@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routes import base, data, nlp
+from routes import base_router, data_router, nlp_router
 from helpers.config import get_settings
 from stores.llm.LLMProviderFactory import LLMProviderFactory
 from stores.vectordb.VectorDBProviderFactory import VectorDBProviderFactory
@@ -12,7 +12,11 @@ app = FastAPI()
 async def startup_span():
     settings = get_settings()
 
-    postgres_conn = f"postgresql+asyncpg://{settings.POSTGRES_USERNAME}:{settings.POSTGRES_PASSWORD}@{settings.POSTGRES_HOST}:{settings.POSTGRES_PORT}/{settings.POSTGRES_MAIN_DATABASE}"
+    # Build connection string with optional password
+    if settings.POSTGRES_PASSWORD:
+        postgres_conn = f"postgresql+asyncpg://{settings.POSTGRES_USERNAME}:{settings.POSTGRES_PASSWORD}@{settings.POSTGRES_HOST}:{settings.POSTGRES_PORT}/{settings.POSTGRES_MAIN_DATABASE}"
+    else:
+        postgres_conn = f"postgresql+asyncpg://{settings.POSTGRES_USERNAME}@{settings.POSTGRES_HOST}:{settings.POSTGRES_PORT}/{settings.POSTGRES_MAIN_DATABASE}"
 
     app.db_engine = create_async_engine(postgres_conn)
     app.db_client = sessionmaker(
@@ -50,6 +54,6 @@ async def shutdown_span():
 app.on_event("startup")(startup_span)
 app.on_event("shutdown")(shutdown_span)
 
-app.include_router(base.base_router)
-app.include_router(data.data_router)
-app.include_router(nlp.nlp_router)
+app.include_router(base_router)
+app.include_router(data_router)
+app.include_router(nlp_router)

@@ -12,11 +12,26 @@ class DataController(BaseController):
         self.size_scale = 1048576 # convert MB to bytes
 
     def validate_uploaded_file(self, file: UploadFile):
-
-        if file.content_type not in self.app_settings.FILE_ALLOWED_TYPES:
+        
+        # Get file extension from filename
+        if not file.filename:
+            return False, ResponseSignal.FILE_TYPE_NOT_SUPPORTED.value
+            
+        file_ext = os.path.splitext(file.filename)[1][1:].lower()  # Remove dot and make lowercase
+        
+        # Parse FILE_ALLOWED_TYPES if it's a JSON string
+        allowed_types = self.app_settings.FILE_ALLOWED_TYPES
+        if isinstance(allowed_types, str):
+            import json
+            try:
+                allowed_types = json.loads(allowed_types)
+            except:
+                allowed_types = ["pdf", "txt", "docx"]  # fallback
+        
+        if file_ext not in allowed_types:
             return False, ResponseSignal.FILE_TYPE_NOT_SUPPORTED.value
 
-        if file.size > self.app_settings.FILE_MAX_SIZE * self.size_scale:
+        if file.size and file.size > self.app_settings.FILE_MAX_SIZE:
             return False, ResponseSignal.FILE_SIZE_EXCEEDED.value
 
         return True, ResponseSignal.FILE_VALIDATED_SUCCESS.value

@@ -1,6 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List
-
+import os
+from pathlib import Path
 class Settings(BaseSettings):
 
     APP_NAME: str
