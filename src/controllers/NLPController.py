@@ -24,7 +24,7 @@ class NLPController(BaseController):
     
     async def get_vector_db_collection_info(self, project: Project):
         collection_name = self.create_collection_name(project_id=project.project_id)
-        collection_info = await self.vectordb_client.get_collection_info(collection_name=collection_name)
+        collection_info = self.vectordb_client.get_collection_info(collection_name=collection_name)
 
         return json.loads(
             json.dumps(collection_info, default=lambda x: x.__dict__)
@@ -37,9 +37,21 @@ class NLPController(BaseController):
         # step1: get collection name
         collection_name = self.create_collection_name(project_id=project.project_id)
 
-        # step2: manage items
-        texts = [ c.chunk_text for c in chunks ]
-        metadata = [ c.chunk_metadata for c in  chunks]
+        # step2: filter out chunks with empty text content
+        valid_chunks = []
+        valid_chunk_ids = []
+        for i, chunk in enumerate(chunks):
+            if chunk.chunk_text and str(chunk.chunk_text).strip():
+                valid_chunks.append(chunk)
+                valid_chunk_ids.append(chunks_ids[i])
+        
+        if not valid_chunks:
+            print(f"No valid chunks with text content found for project {project.project_id}")
+            return True  # Return success but skip indexing
+        
+        # step3: manage items from valid chunks only
+        texts = [c.chunk_text for c in valid_chunks]
+        metadata = [c.chunk_metadata for c in valid_chunks]
         vectors = self.embedding_client.embed_text(text=texts, 
                                                   document_type=DocumentTypeEnum.DOCUMENT.value)
 
@@ -50,13 +62,13 @@ class NLPController(BaseController):
             do_reset=do_reset,
         )
 
-        # step4: insert into vector db
+        # step5: insert into vector db
         _ = await self.vectordb_client.insert_many(
             collection_name=collection_name,
             texts=texts,
             metadata=metadata,
             vectors=vectors,
-            record_ids=chunks_ids,
+            record_ids=valid_chunk_ids,
         )
 
         return True

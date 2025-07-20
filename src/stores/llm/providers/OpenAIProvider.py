@@ -86,9 +86,16 @@ class OpenAIProvider(LLMInterface):
             self.logger.error("Embedding model for OpenAI was not set")
             return None
         
+        # Filter out empty or None texts
+        filtered_text = [t.strip() for t in text if t and str(t).strip()]
+        
+        if not filtered_text:
+            self.logger.error("No valid text content to embed")
+            return []
+        
         response = self.client.embeddings.create(
             model = self.embedding_model_id,
-            input = text,
+            input = filtered_text,
         )
 
         if not response or not response.data or len(response.data) == 0 or not response.data[0].embedding:

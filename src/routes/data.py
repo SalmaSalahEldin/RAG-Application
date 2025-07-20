@@ -91,10 +91,27 @@ async def upload_data(request: Request, project_id: int, file: UploadFile,
 
 @data_router.post("/process/{project_id}")
 async def process_endpoint(request: Request, project_id: int, process_request: ProcessRequest):
-
-    chunk_size = process_request.chunk_size
-    overlap_size = process_request.overlap_size
-    do_reset = process_request.do_reset
+    """
+    Process uploaded files in a project and convert them into searchable chunks.
+    
+    Args:
+        project_id: Project ID to process files for
+        process_request: Processing configuration (chunk_size, overlap_size, do_reset, file_id)
+        
+    Returns:
+        JSON response with processing results or error details
+        
+    Raises:
+        400: If no files found, invalid file_id, or processing fails
+    """
+    
+    # Validate input parameters
+    chunk_size = process_request.chunk_size or 100
+    overlap_size = process_request.overlap_size or 20
+    do_reset = process_request.do_reset or 0
+    
+    # Log processing request for debugging
+    logger.info(f"Processing request for project {project_id}: chunk_size={chunk_size}, overlap_size={overlap_size}, do_reset={do_reset}, file_id={process_request.file_id}")
 
     project_model = await ProjectModel.create_instance(
         db_client=request.app.db_client
@@ -123,10 +140,13 @@ async def process_endpoint(request: Request, project_id: int, process_request: P
         )
 
         if asset_record is None:
+            logger.warning(f"File with ID '{process_request.file_id}' not found in project {project_id}")
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content={
                     "signal": ResponseSignal.FILE_ID_ERROR.value,
+                    "message": f"File with ID '{process_request.file_id}' not found in project {project_id}",
+                    "suggestion": "Check if the file was uploaded correctly or use a valid file_id"
                 }
             )
 
@@ -148,10 +168,13 @@ async def process_endpoint(request: Request, project_id: int, process_request: P
         }
 
     if len(project_files_ids) == 0:
+        logger.warning(f"No files found in project {project_id} for processing")
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content={
                 "signal": ResponseSignal.NO_FILES_ERROR.value,
+                "message": f"No files found in project {project_id}",
+                "suggestion": f"Upload files first using POST /api/v1/data/upload/{project_id}"
             }
         )
     
@@ -174,12 +197,18 @@ async def process_endpoint(request: Request, project_id: int, process_request: P
             project_id=project.project_id
         )
 
+    failed_files = []
+    processed_files_details = []
+    
     for asset_id, file_id in project_files_ids.items():
+        logger.info(f"Processing file: {file_id} (asset_id: {asset_id})")
 
         file_content = process_controller.get_file_content(file_id=file_id)
 
         if file_content is None:
-            logger.error(f"Error while processing file: {file_id}")
+            error_msg = f"Failed to load content from file: {file_id}"
+            logger.error(error_msg)
+            failed_files.append({"file_id": file_id, "reason": "Could not load file content", "asset_id": asset_id})
             continue
 
         file_chunks = process_controller.process_file_content(
@@ -190,12 +219,10 @@ async def process_endpoint(request: Request, project_id: int, process_request: P
         )
 
         if file_chunks is None or len(file_chunks) == 0:
-            return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content={
-                    "signal": ResponseSignal.PROCESSING_FAILED.value
-                }
-            )
+            error_msg = f"No chunks generated for file {file_id} in project {project_id}"
+            logger.error(error_msg)
+            failed_files.append({"file_id": file_id, "reason": "No text chunks generated", "asset_id": asset_id})
+            continue
 
         file_chunks_records = [
             DataChunk(
@@ -208,13 +235,37 @@ async def process_endpoint(request: Request, project_id: int, process_request: P
             for i, chunk in enumerate(file_chunks)
         ]
 
-        no_records += await chunk_model.insert_many_chunks(chunks=file_chunks_records)
+        chunk_count = await chunk_model.insert_many_chunks(chunks=file_chunks_records)
+        no_records += chunk_count
         no_files += 1
+        
+        processed_files_details.append({
+            "file_id": file_id, 
+            "asset_id": asset_id, 
+            "chunks_created": len(file_chunks),
+            "chunks_inserted": chunk_count
+        })
+        
+        logger.info(f"Successfully processed file {file_id}: {len(file_chunks)} chunks created, {chunk_count} inserted")
 
-    return JSONResponse(
-        content={
-            "signal": ResponseSignal.PROCESSING_SUCCESS.value,
-            "inserted_chunks": no_records,
-            "processed_files": no_files
-        }
-    )
+    # Log summary
+    total_files = len(project_files_ids)
+    logger.info(f"Processing complete: {no_files}/{total_files} files processed successfully, {len(failed_files)} failed")
+    
+    if failed_files:
+        logger.warning(f"Failed files: {[f['file_id'] for f in failed_files]}")
+
+    # Return detailed response
+    response_content = {
+        "signal": ResponseSignal.PROCESSING_SUCCESS.value,
+        "inserted_chunks": no_records,
+        "processed_files": no_files,
+        "total_files": total_files,
+    }
+    
+    # Include failed files info if any
+    if failed_files:
+        response_content["failed_files"] = failed_files
+        response_content["warning"] = f"{len(failed_files)} file(s) could not be processed"
+    
+    return JSONResponse(content=response_content)
