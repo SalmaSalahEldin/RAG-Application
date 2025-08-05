@@ -23,7 +23,31 @@ class QdrantDBProvider(VectorDBInterface):
         self.logger = logging.getLogger('uvicorn')
 
     async def connect(self):
-        self.client = QdrantClient(path=self.db_client)
+        try:
+            # First try to connect to Qdrant server (recommended approach)
+            self.client = QdrantClient(host="localhost", port=6333)
+            # Test the connection by listing collections
+            self.client.get_collections()
+            self.logger.info("✅ Successfully connected to Qdrant server on localhost:6333")
+        except Exception as e:
+            self.logger.warning(f"⚠️  Could not connect to Qdrant server: {e}")
+            self.logger.info("📝 Falling back to local storage...")
+            
+            try:
+                self.client = QdrantClient(path=self.db_client)
+                # Test the connection by listing collections
+                self.client.get_collections()
+                self.logger.info(f"✅ Successfully connected to Qdrant local storage at: {self.db_client}")
+            except Exception as local_e:
+                if "already accessed by another instance" in str(local_e):
+                    self.logger.warning(f"⚠️  Qdrant local instance already running at: {self.db_client}")
+                    self.logger.info("📝 Attempting to use existing local instance...")
+                    # Try one more time - sometimes it works despite the warning
+                    self.client = QdrantClient(path=self.db_client)
+                else:
+                    self.logger.error(f"❌ Failed to connect to Qdrant: {local_e}")
+                    self.logger.error("💡 To use Qdrant server, run: docker run -p 6333:6333 qdrant/qdrant")
+                    raise local_e
 
     async def disconnect(self):
         self.client = None

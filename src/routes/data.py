@@ -10,9 +10,10 @@ from .schemes.data import ProcessRequest
 from models.ProjectModel import ProjectModel
 from models.ChunkModel import ChunkModel
 from models.AssetModel import AssetModel
-from models.db_schemes import DataChunk, Asset
+from models.db_schemes import DataChunk, Asset, User
 from models.enums.AssetTypeEnum import AssetTypeEnum
 from controllers import NLPController
+from utils.auth import get_current_active_user
 
 logger = logging.getLogger('uvicorn.error')
 
@@ -23,7 +24,8 @@ data_router = APIRouter(
 
 @data_router.post("/upload/{project_id}")
 async def upload_data(request: Request, project_id: int, file: UploadFile,
-                      app_settings: Settings = Depends(get_settings)):
+                      app_settings: Settings = Depends(get_settings),
+                      current_user: User = Depends(get_current_active_user)):
         
     
     project_model = await ProjectModel.create_instance(
@@ -90,7 +92,8 @@ async def upload_data(request: Request, project_id: int, file: UploadFile,
         )
 
 @data_router.post("/process/{project_id}")
-async def process_endpoint(request: Request, project_id: int, process_request: ProcessRequest):
+async def process_endpoint(request: Request, project_id: int, process_request: ProcessRequest,
+                          current_user: User = Depends(get_current_active_user)):
     """
     Process uploaded files in a project and convert them into searchable chunks.
     
@@ -134,10 +137,23 @@ async def process_endpoint(request: Request, project_id: int, process_request: P
 
     project_files_ids = {}
     if process_request.file_id:
+        # Try to find asset by asset_name first
         asset_record = await asset_model.get_asset_record(
             asset_project_id=project.project_id,
             asset_name=process_request.file_id
         )
+        
+        # If not found by asset_name, try to find by asset_id
+        if asset_record is None:
+            try:
+                asset_id = int(process_request.file_id)
+                # Get asset by asset_id
+                asset_record = await asset_model.get_asset_by_id(
+                    asset_id=asset_id,
+                    asset_project_id=project.project_id
+                )
+            except (ValueError, TypeError):
+                asset_record = None
 
         if asset_record is None:
             logger.warning(f"File with ID '{process_request.file_id}' not found in project {project_id}")
