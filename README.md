@@ -93,176 +93,163 @@ A complete, production-ready AI-powered question-answering API service built wit
 
 ### **1. Clone the Repository**
 ```bash
-git clone <your-repo-url>
-cd RAG
+git clone https://github.com/SalmaSalahEldin/RAG-Application.git
+cd RAG-Application
 ```
 
-### **2. Set Up Environment**
+### **2. Environment Configuration**
 ```bash
 # Copy environment template
 cp env.example .env
 
-# Edit .env file with your configuration
+# Edit .env with your configuration
 nano .env
 ```
 
-### **3. Configure Environment Variables**
-Edit the `.env` file with your settings:
-
+**Required Environment Variables:**
 ```bash
-# Required: OpenAI API Key
-OPENAI_API_KEY=your-openai-api-key-here
+# Database Configuration
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/minirag
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=minirag
 
-# Required: Database Configuration
-POSTGRES_PASSWORD=your-db-password
-SECRET_KEY=your-super-secret-key-change-this-in-production
-
-# Optional: Customize other settings
-GENERATION_MODEL_ID=gpt-3.5-turbo
+# OpenAI Configuration
+OPENAI_API_KEY=your_openai_api_key_here
 EMBEDDING_MODEL_ID=text-embedding-3-large
+EMBEDDING_MODEL_SIZE=3072
+
+# Application Configuration
+APP_NAME=RAG
+SECRET_KEY=your_secret_key_here
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+# Vector Database Configuration
+VECTOR_DB_BACKEND=qdrant
+VECTOR_DB_URL=http://localhost:6333
 ```
 
-### **4. Set Up Database**
+### **3. Database Setup**
 ```bash
-# Install PostgreSQL (Ubuntu/Debian)
-sudo apt update
-sudo apt install postgresql postgresql-contrib
+# Start PostgreSQL (if using Docker)
+docker run -d \
+  --name postgres-rag \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=minirag \
+  -p 5432:5432 \
+  postgres:15
 
-# Start PostgreSQL service
-sudo systemctl start postgresql
-sudo systemctl enable postgresql
-
-# Set up database
-sudo -u postgres psql
-CREATE DATABASE minirag;
-CREATE USER minirag_user WITH PASSWORD 'your-password';
-GRANT ALL PRIVILEGES ON DATABASE minirag TO minirag_user;
-\q
+# Or use local PostgreSQL
+sudo -u postgres createdb minirag
 ```
 
-### **5. Install Dependencies**
+### **4. Install Dependencies**
 ```bash
-# Navigate to src directory
-cd src
-
 # Create virtual environment
 python3 -m venv venv
-
-# Activate virtual environment
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate
 
 # Install dependencies
-pip install -r requirements.txt
+pip install -r src/requirements.txt
 ```
 
-### **6. Run Database Migrations**
+### **5. Run Database Migrations**
 ```bash
-# From the project root
+# Run migrations
 ./run_migrations.sh
 ```
 
-### **7. Start Qdrant (Vector Database)**
+### **6. Start Qdrant (Vector Database)**
 ```bash
-# Option 1: Using Docker (recommended)
-./start_qdrant.sh
+# Using Docker
+docker run -d \
+  --name qdrant-rag \
+  -p 6333:6333 \
+  -p 6334:6334 \
+  qdrant/qdrant
 
-# Option 2: Using local storage (no Docker required)
-# The system will automatically use local storage
+# Or use local Qdrant
+./start_qdrant.sh
 ```
 
-### **8. Start the Application**
+### **7. Start the Application**
 ```bash
-# Navigate to src directory
+# Start the server
+./start_server.sh
+
+# Or manually
 cd src
-
-# Activate virtual environment
-source venv/bin/activate
-
-# Start the application
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-### **9. Access the Application**
+### **8. Access the Application**
 - **Web Interface**: http://localhost:8000
 - **API Documentation**: http://localhost:8000/docs
-- **Alternative API Docs**: http://localhost:8000/redoc
+- **Alternative Docs**: http://localhost:8000/redoc
 
 ## 🛠️ Tech Stack
 
 ### **Backend**
 - **Framework**: FastAPI (Python)
 - **Database**: PostgreSQL with pgvector extension
-- **ORM**: SQLAlchemy with async support
+- **ORM**: SQLAlchemy (async)
+- **Authentication**: JWT (PyJWT)
 - **Migrations**: Alembic
-- **Authentication**: JWT (JSON Web Tokens)
-- **Validation**: Pydantic
+- **Testing**: pytest, pytest-asyncio, pytest-cov
 
 ### **AI/ML**
-- **LLM Provider**: OpenAI GPT models
-- **Embeddings**: OpenAI text-embedding-3-large (3072 dimensions)
+- **LLM Provider**: OpenAI GPT-3.5/4
+- **Embeddings**: OpenAI text-embedding-3-large (3072d)
 - **Vector Database**: Qdrant
-- **Text Chunking**: LangChain SemanticChunker
-- **Similarity Search**: Cosine similarity
+- **Text Processing**: LangChain (semantic chunking)
+- **Document Processing**: PyPDF2, python-multipart
 
 ### **Frontend**
-- **Language**: Vanilla JavaScript (ES6+)
-- **Styling**: CSS3 with modern design
-- **UI Components**: Custom-built components
-- **HTTP Client**: Fetch API
-- **Real-time**: WebSocket-like polling
+- **Technology**: Vanilla JavaScript, HTML5, CSS3
+- **Features**: Responsive design, real-time updates
+- **UI Components**: Custom components with modern styling
 
 ### **Development & Testing**
 - **Testing Framework**: pytest
 - **Code Coverage**: pytest-cov
-- **Async Testing**: pytest-asyncio
-- **Mocking**: unittest.mock
-- **Linting**: flake8 (recommended)
+- **Linting**: flake8 (configurable)
+- **Documentation**: Auto-generated OpenAPI/Swagger
 
 ### **Deployment**
-- **Container**: Docker (optional)
-- **Process Manager**: uvicorn
-- **Environment**: Python virtual environment
-- **Configuration**: Environment variables
+- **Containerization**: Docker & Docker Compose
+- **Process Management**: uvicorn
+- **Environment Management**: python-dotenv
 
-## 📚 API Usage & Swagger Documentation
+## 📚 API Usage & Swagger
 
-### **Interactive API Documentation**
-The application provides comprehensive API documentation through Swagger UI:
+### **Interactive Documentation**
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
 
-1. **Access Swagger UI**: http://localhost:8000/docs
-2. **Alternative Documentation**: http://localhost:8000/redoc
-
-### **Key API Endpoints**
+### **Key Endpoints**
 
 #### **Authentication**
 ```bash
-# Register new user
+# Register user
 POST /api/v1/auth/register
 {
   "email": "user@example.com",
-  "password": "password123"
+  "password": "securepassword"
 }
 
-# Login user
+# Login
 POST /api/v1/auth/login
 {
-  "email": "user@example.com", 
-  "password": "password123"
+  "email": "user@example.com",
+  "password": "securepassword"
 }
-
-# Get user info
-GET /api/v1/auth/me
-Authorization: Bearer <token>
 ```
 
 #### **Project Management**
 ```bash
 # Create project
-POST /api/v1/data/projects
-{
-  "project_code": "my-project",
-  "project_name": "My Project"
-}
+POST /api/v1/data/projects/create/{project_code}
 
 # List user projects
 GET /api/v1/data/projects
@@ -270,7 +257,7 @@ GET /api/v1/data/projects
 # Get project details
 GET /api/v1/data/projects/{project_code}
 
-# Delete project
+# Delete project (and all files)
 DELETE /api/v1/data/projects/{project_code}
 ```
 
@@ -279,56 +266,63 @@ DELETE /api/v1/data/projects/{project_code}
 # Upload file
 POST /api/v1/data/upload/{project_code}
 Content-Type: multipart/form-data
-file: <file>
 
-# Process files
+# Process file (chunking & embedding)
 POST /api/v1/data/process/{project_code}
+{
+  "asset_id": 123,
+  "chunking_method": "semantic"
+}
 
 # Get file content
 GET /api/v1/data/file/content/{project_code}/{asset_id}
 
-# Delete file
+# Delete single file
 DELETE /api/v1/data/file/{project_code}/{asset_id}
 ```
 
 #### **Question Answering**
 ```bash
 # Ask question
-POST /api/v1/nlp/ask
+POST /api/v1/nlp/ask/{project_code}
 {
-  "question": "What is this document about?",
-  "project_code": "my-project"
+  "question": "What is the main topic of the document?",
+  "limit": 10
 }
 
-# Get project info
+# Get project index info
 GET /api/v1/nlp/index/info/{project_code}
 ```
 
-### **API Response Format**
-All API responses follow a consistent format:
-
+### **Response Format**
 ```json
 {
   "signal": "SUCCESS",
   "data": {
-    // Response data
-  },
-  "message": "Operation completed successfully"
+    "answer": "The main topic is...",
+    "sources": ["chunk1", "chunk2"],
+    "metadata": {
+      "processing_time": 1.23,
+      "chunks_retrieved": 5
+    }
+  }
 }
 ```
 
 ### **Error Handling**
-The API provides detailed error responses:
-
 ```json
 {
-  "signal": "ERROR_TYPE",
-  "error": "Error title",
-  "message": "Detailed error message"
+  "error": {
+    "code": "FILE_NOT_FOUND",
+    "title": "File Not Found",
+    "message": "File with ID 123 not found",
+    "suggestion": "Check if the file exists",
+    "category": "file"
+  }
 }
 ```
 
-## ⚠️ Known Limitations
+## 🎯 Known Limitations
 
 ### **Current Limitations**
 1. **File Size**: Maximum file size is 10MB (configurable)
