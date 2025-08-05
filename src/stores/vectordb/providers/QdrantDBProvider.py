@@ -24,11 +24,20 @@ class QdrantDBProvider(VectorDBInterface):
 
     async def connect(self):
         try:
-            # First try to connect to Qdrant server (recommended approach)
-            self.client = QdrantClient(host="localhost", port=6333)
-            # Test the connection by listing collections
-            self.client.get_collections()
-            self.logger.info("✅ Successfully connected to Qdrant server on localhost:6333")
+            # Check if we have a path (local storage) or should try server
+            if self.db_client and not self.db_client.startswith("http"):
+                # Use local storage directly
+                self.logger.info("📝 Using Qdrant local storage...")
+                self.client = QdrantClient(path=self.db_client)
+                # Test the connection by listing collections
+                self.client.get_collections()
+                self.logger.info(f"✅ Successfully connected to Qdrant local storage at: {self.db_client}")
+            else:
+                # Try to connect to Qdrant server first
+                self.client = QdrantClient(host="localhost", port=6333)
+                # Test the connection by listing collections
+                self.client.get_collections()
+                self.logger.info("✅ Successfully connected to Qdrant server on localhost:6333")
         except Exception as e:
             self.logger.warning(f"⚠️  Could not connect to Qdrant server: {e}")
             self.logger.info("📝 Falling back to local storage...")

@@ -57,5 +57,15 @@ class AssetModel(BaseDataModel):
             record = result.scalar_one_or_none()
         return record
 
+    async def get_project_assets(self, project_id: int):
+        """
+        Get all assets for a specific project.
+        """
+        async with self.db_client() as session:
+            stmt = select(Asset).where(Asset.asset_project_id == project_id)
+            result = await session.execute(stmt)
+            records = result.scalars().all()
+        return records
+
 
     

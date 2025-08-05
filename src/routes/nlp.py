@@ -1,18 +1,20 @@
-from fastapi import FastAPI, APIRouter, status, Request, Depends
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.responses import JSONResponse
-from routes.schemes.nlp import PushRequest, SearchRequest
-from models.ProjectModel import ProjectModel
-from models.ChunkModel import ChunkModel
-from models.db_schemes import User, QueryLog
-from controllers import NLPController
-from models import ResponseSignal
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List, Optional
+import logging
+import time
+
+from models.db_schemes.minirag.schemes import User, QueryLog
+from models.enums.ResponseEnums import ResponseSignal
+from models import ProjectModel, ChunkModel
+from routes.schemes.nlp import SearchRequest, PushRequest
 from utils.auth import get_current_active_user
+from utils.error_handler import ErrorHandler, handle_project_error, handle_nlp_error, handle_vectordb_error
+from controllers import NLPController
 from database import get_db
 from tqdm.auto import tqdm
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-import time
-import logging
 
 logger = logging.getLogger('uvicorn.error')
 
@@ -21,8 +23,8 @@ nlp_router = APIRouter(
     tags=["nlp"],
 )
 
-@nlp_router.post("/index/push/{project_id}")
-async def index_project(request: Request, project_id: int, push_request: PushRequest,
+@nlp_router.post("/index/push/{project_code}")
+async def index_project(request: Request, project_code: int, push_request: PushRequest,
                        current_user: User = Depends(get_current_active_user)):
 
     # Check if vector database client is available
@@ -44,17 +46,19 @@ async def index_project(request: Request, project_id: int, push_request: PushReq
         db_client=request.app.db_client
     )
 
-    project = await project_model.get_project_or_create_one(
-        project_id=project_id
+    # Get project with user access validation
+    project = await project_model.get_user_project(
+        project_code=project_code,
+        user_id=current_user.user_id
     )
 
+    # Check if user has access to this project
     if not project:
-        return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content={
-                "signal": ResponseSignal.PROJECT_NOT_FOUND_ERROR.value
-            }
-        )
+        return handle_project_error("ACCESS_DENIED", {
+            "project_code": project_code,
+            "user_id": current_user.user_id,
+            "message": "Project not found or access denied"
+        })
     
     nlp_controller = NLPController(
         vectordb_client=request.app.vectordb_client,
@@ -83,7 +87,7 @@ async def index_project(request: Request, project_id: int, push_request: PushReq
         pbar = tqdm(total=total_chunks_count, desc="Vector Indexing", position=0)
 
         while has_records:
-            page_chunks = await chunk_model.get_poject_chunks(project_id=project.project_id, page_no=page_no)
+            page_chunks = await chunk_model.get_project_chunks(project_id=project.project_id, page_no=page_no)
             if len(page_chunks):
                 page_no += 1
             
@@ -101,12 +105,10 @@ async def index_project(request: Request, project_id: int, push_request: PushReq
             )
 
             if not is_inserted:
-                return JSONResponse(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    content={
-                        "signal": ResponseSignal.INSERT_INTO_VECTORDB_ERROR.value
-                    }
-                )
+                return handle_vectordb_error("INSERT_FAILED", {
+                    "project_id": project.project_id,
+                    "message": "Failed to insert data into vector database"
+                })
 
             pbar.update(len(page_chunks))
             inserted_items_count += len(page_chunks)
@@ -119,35 +121,46 @@ async def index_project(request: Request, project_id: int, push_request: PushReq
         )
     
     except ValueError as e:
+        return handle_nlp_error("SERVICE_UNAVAILABLE", {
+            "project_id": project.project_id,
+            "error": str(e),
+            "message": "NLP features are currently unavailable. Please check your configuration."
+        })
+    except Exception as e:
+        return ErrorHandler.handle_exception(e, context="nlp", user_id=current_user.user_id)
+
+@nlp_router.get("/index/info/{project_code}")
+async def get_project_index_info(request: Request, project_code: int,
+                               current_user: User = Depends(get_current_active_user)):
+    
+    # Check if vector database client is available
+    if request.app.vectordb_client is None:
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             content={
                 "signal": "SERVICE_UNAVAILABLE",
-                "error": str(e),
-                "message": "NLP features are currently unavailable. Please check your configuration."
-            }
-        )
-    except Exception as e:
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={
-                "signal": "INTERNAL_ERROR",
-                "error": "An unexpected error occurred",
-                "message": str(e)
+                "error": "Vector database client is not initialized. Please check your configuration.",
+                "message": "NLP features are currently unavailable. Please ensure OpenAI API key is configured."
             }
         )
 
-@nlp_router.get("/index/info/{project_id}")
-async def get_project_index_info(request: Request, project_id: int,
-                                current_user: User = Depends(get_current_active_user)):
-    
     project_model = await ProjectModel.create_instance(
         db_client=request.app.db_client
     )
 
-    project = await project_model.get_project_or_create_one(
-        project_id=project_id
+    # Get project with user access validation
+    project = await project_model.get_user_project(
+        project_code=project_code,
+        user_id=current_user.user_id
     )
+
+    # Check if user has access to this project
+    if not project:
+        return handle_project_error("ACCESS_DENIED", {
+            "project_code": project_code,
+            "user_id": current_user.user_id,
+            "message": "Project not found or access denied"
+        })
 
     nlp_controller = NLPController(
         vectordb_client=request.app.vectordb_client,
@@ -156,17 +169,58 @@ async def get_project_index_info(request: Request, project_id: int,
         template_parser=request.app.template_parser,
     )
 
-    collection_info = await nlp_controller.get_vector_db_collection_info(project=project)
+    try:
+        collection_name = nlp_controller.create_collection_name(project_id=project.project_id)
+        collection_info = request.app.vectordb_client.get_collection_info(collection_name=collection_name)
+        
+        # Convert CollectionInfo to dict for JSON serialization
+        # Handle both Qdrant CollectionInfo object and dict responses
+        if hasattr(collection_info, '__dict__'):
+            # It's an object, try to access common attributes
+            collection_info_dict = {
+                "collection_name": collection_name,
+                "vectors_count": getattr(collection_info, 'vectors_count', 0) or 0,
+                "points_count": getattr(collection_info, 'points_count', 0) or 0,
+                "segments_count": getattr(collection_info, 'segments_count', 0) or 0,
+                "status": getattr(collection_info, 'status', 'unknown')
+            }
+        elif isinstance(collection_info, dict):
+            # It's already a dict
+            collection_info_dict = {
+                "collection_name": collection_name,
+                "vectors_count": collection_info.get('vectors_count', 0),
+                "points_count": collection_info.get('points_count', 0),
+                "segments_count": collection_info.get('segments_count', 0),
+                "status": collection_info.get('status', 'unknown')
+            }
+        else:
+            # Fallback for unknown types
+            collection_info_dict = {
+                "collection_name": collection_name,
+                "vectors_count": 0,
+                "points_count": 0,
+                "segments_count": 0,
+                "status": "unknown"
+            }
 
-    return JSONResponse(
-        content={
-            "signal": ResponseSignal.VECTORDB_COLLECTION_RETRIEVED.value,
-            "collection_info": collection_info
-        }
-    )
+        return JSONResponse(
+            content={
+                "signal": ResponseSignal.VECTORDB_COLLECTION_RETRIEVED.value,
+                "collection_info": collection_info_dict
+            }
+        )
+    
+    except ValueError as e:
+        return handle_nlp_error("SERVICE_UNAVAILABLE", {
+            "project_id": project_code,
+            "error": str(e),
+            "message": "NLP features are currently unavailable. Please check your configuration."
+        })
+    except Exception as e:
+        return ErrorHandler.handle_exception(e, context="nlp", user_id=current_user.user_id)
 
-@nlp_router.post("/index/search/{project_id}")
-async def search_index(request: Request, project_id: int, search_request: SearchRequest,
+@nlp_router.post("/index/search/{project_code}")
+async def search_index(request: Request, project_code: int, search_request: SearchRequest,
                       current_user: User = Depends(get_current_active_user)):
     
     # Check if vector database client is available
@@ -179,14 +233,24 @@ async def search_index(request: Request, project_id: int, search_request: Search
                 "message": "NLP features are currently unavailable. Please ensure OpenAI API key is configured."
             }
         )
-    
+
     project_model = await ProjectModel.create_instance(
         db_client=request.app.db_client
     )
 
-    project = await project_model.get_project_or_create_one(
-        project_id=project_id
+    # Get project with user access validation
+    project = await project_model.get_user_project(
+        project_code=project_code,
+        user_id=current_user.user_id
     )
+
+    # Check if user has access to this project
+    if not project:
+        return handle_project_error("ACCESS_DENIED", {
+            "project_code": project_code,
+            "user_id": current_user.user_id,
+            "message": "Project not found or access denied"
+        })
 
     nlp_controller = NLPController(
         vectordb_client=request.app.vectordb_client,
@@ -216,26 +280,16 @@ async def search_index(request: Request, project_id: int, search_request: Search
         )
     
     except ValueError as e:
-        return JSONResponse(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content={
-                "signal": "SERVICE_UNAVAILABLE",
-                "error": str(e),
-                "message": "NLP features are currently unavailable. Please check your configuration."
-            }
-        )
+        return handle_nlp_error("SERVICE_UNAVAILABLE", {
+            "project_id": project_code,
+            "error": str(e),
+            "message": "NLP features are currently unavailable. Please check your configuration."
+        })
     except Exception as e:
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={
-                "signal": "INTERNAL_ERROR",
-                "error": "An unexpected error occurred",
-                "message": str(e)
-            }
-        )
+        return ErrorHandler.handle_exception(e, context="nlp", user_id=current_user.user_id)
 
-@nlp_router.post("/index/answer/{project_id}")
-async def answer_rag(request: Request, project_id: int, search_request: SearchRequest,
+@nlp_router.post("/index/answer/{project_code}")
+async def answer_rag(request: Request, project_code: int, search_request: SearchRequest,
                     current_user: User = Depends(get_current_active_user), db: AsyncSession = Depends(get_db)):
     
     # Check if vector database client is available
@@ -248,14 +302,24 @@ async def answer_rag(request: Request, project_id: int, search_request: SearchRe
                 "message": "NLP features are currently unavailable. Please ensure OpenAI API key is configured."
             }
         )
-    
+
     project_model = await ProjectModel.create_instance(
         db_client=request.app.db_client
     )
 
-    project = await project_model.get_project_or_create_one(
-        project_id=project_id
+    # Get project with user access validation
+    project = await project_model.get_user_project(
+        project_code=project_code,
+        user_id=current_user.user_id
     )
+
+    # Check if user has access to this project
+    if not project:
+        return handle_project_error("ACCESS_DENIED", {
+            "project_code": project_code,
+            "user_id": current_user.user_id,
+            "message": "Project not found or access denied"
+        })
 
     nlp_controller = NLPController(
         vectordb_client=request.app.vectordb_client,
@@ -308,20 +372,10 @@ async def answer_rag(request: Request, project_id: int, search_request: SearchRe
         )
     
     except ValueError as e:
-        return JSONResponse(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content={
-                "signal": "SERVICE_UNAVAILABLE",
-                "error": str(e),
-                "message": "NLP features are currently unavailable. Please check your configuration."
-            }
-        )
+        return handle_nlp_error("SERVICE_UNAVAILABLE", {
+            "project_id": project_code,
+            "error": str(e),
+            "message": "NLP features are currently unavailable. Please check your configuration."
+        })
     except Exception as e:
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={
-                "signal": "INTERNAL_ERROR",
-                "error": "An unexpected error occurred",
-                "message": str(e)
-            }
-        )
+        return ErrorHandler.handle_exception(e, context="nlp", user_id=current_user.user_id)

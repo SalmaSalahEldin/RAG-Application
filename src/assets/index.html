@@ -223,6 +223,252 @@
         .tab-content.active {
             display: block;
         }
+
+        /* New styles for project management */
+        .project-management-section {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #e1e5e9;
+        }
+
+        .project-creation-section {
+            margin-bottom: 20px;
+        }
+
+        .project-creation-input {
+            display: flex;
+            align-items: center;
+        }
+
+        .project-creation-input input {
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .project-selection-section {
+            margin-bottom: 20px;
+        }
+
+        .project-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .project-status {
+            margin-top: 20px;
+        }
+
+        .status-card {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .status-card h5 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .status-card p {
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .form-help {
+            display: block;
+            margin-top: 5px;
+            font-size: 0.8em;
+            color: #666;
+        }
+        .file-upload-section {
+            margin-top: 20px;
+        }
+
+        .upload-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .chat-section {
+            margin-top: 20px;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        }
+
+        .project-creation-input input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+
+        .status-card {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            border: 1px solid #bbdefb;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .project-management-section h4 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .file-upload-section h4,
+        .chat-section h4 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        /* File Content Display Styles */
+        .file-content-section {
+            margin-top: 20px;
+            background: #f9f9f9;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .file-content-section h4 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .file-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #e3f2fd;
+            border-radius: 6px;
+            border: 1px solid #bbdefb;
+        }
+
+        .file-details {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .file-details span {
+            padding: 4px 8px;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        .file-content-display {
+            background: white;
+            border: 1px solid #e1e5e9;
+            border-radius: 6px;
+            max-height: 400px;
+            overflow: hidden;
+        }
+
+        .content-container {
+            padding: 15px;
+            max-height: 350px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background: #fafafa;
+            border-radius: 4px;
+        }
+
+        .content-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .content-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .content-container::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .content-container::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* Files Section Styles */
+        .files-section {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+
+        .files-section h6 {
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 0.9em;
+        }
+
+        .files-list {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .file-item {
+            cursor: pointer;
+            padding: 8px 12px;
+            background: #f0f8ff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.85em;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .file-item:hover {
+            background: #e6f3ff;
+            border-color: #b3d9ff;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .file-item:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* Username Styling */
+        #userName {
+            color: #667eea;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
     </style>
 </head>
 <body>
@@ -239,8 +485,8 @@
                 <div class="status" id="authStatus"></div>
                 
                 <div class="tabs">
-                    <div class="tab active" onclick="showTab('login')">Login</div>
-                    <div class="tab" onclick="showTab('register')">Register</div>
+                    <div class="tab active" onclick="showTab('login', event)">Login</div>
+                    <div class="tab" onclick="showTab('register', event)">Register</div>
                 </div>
                 
                 <div id="loginTab" class="tab-content active">
@@ -275,38 +521,95 @@
             <!-- Main Application Section -->
             <div id="appSection" class="auth-section">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h2>Welcome, <span id="userEmail"></span>!</h2>
+                    <h2>Welcome, <span id="userName"></span>!</h2>
                     <button class="btn btn-danger" onclick="logout()">Logout</button>
                 </div>
                 
                 <div class="status" id="appStatus"></div>
                 
                 <div class="tabs">
-                    <div class="tab active" onclick="showAppTab('upload')">Upload Documents</div>
-                    <div class="tab" onclick="showAppTab('chat')">Ask Questions</div>
+                    <div class="tab active" onclick="showAppTab('upload', event)">Upload Documents</div>
+                    <div class="tab" onclick="showAppTab('chat', event)">Ask Questions</div>
                 </div>
                 
                 <div id="uploadTab" class="tab-content active">
                     <h3>Upload Documents</h3>
                     <p>Upload your documents (PDF, TXT) to create a knowledge base for question answering.</p>
                     
-                    <div class="form-group">
-                        <label for="projectId">Project ID</label>
-                        <input type="number" id="projectId" value="1" min="1">
+                    <!-- Project Management Section -->
+                    <div class="project-management-section">
+                        <h4>📁 Project Management</h4>
+                        
+                        <!-- Project Creation Section (Always Visible) -->
+                        <div class="project-creation-section">
+                            <div class="form-group">
+                                <label for="newProjectId">Create New Project</label>
+                                <div class="project-creation-input">
+                                    <input type="number" id="newProjectId" min="1" placeholder="Enter project ID (e.g., 1, 2, 3...)" style="flex: 1;">
+                                    <button class="btn btn-primary" onclick="createNewProject()" style="margin-left: 10px;">Create Project</button>
+                                </div>
+                                <small class="form-help">Enter a unique number to identify your project. Project numbers are unique within your account.</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Project Selection Section -->
+                        <div class="project-selection-section">
+                            <div class="form-group">
+                                <label for="projectSelect">Select Project for Upload</label>
+                                <select id="projectSelect" onchange="updateProjectId()">
+                                    <option value="" disabled selected>No selected project</option>
+                                </select>
+                                <div class="project-actions">
+                                    <button class="btn btn-secondary" onclick="loadUserProjects()">🔄 Refresh Projects</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Project Status Display -->
+                        <div id="projectStatus" class="project-status" style="display: none;">
+                            <div class="status-card">
+                                <h5>📋 Current Project Status</h5>
+                                <div id="projectStatusContent"></div>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div class="file-upload">
-                        <input type="file" id="fileInput" accept=".pdf,.txt">
-                        <label for="fileInput">📁 Choose a file or drag it here</label>
+                    <!-- File Upload Section -->
+                    <div class="file-upload-section">
+                        <h4>📄 File Upload</h4>
+                        <div class="file-upload">
+                            <input type="file" id="fileInput" accept=".pdf,.txt">
+                            <label for="fileInput">📁 Choose a file or drag it here</label>
+                        </div>
+                        
+                        <div class="upload-actions">
+                            <button class="btn" onclick="uploadFile()" id="uploadBtn" disabled>Upload File</button>
+                            <button class="btn btn-success" onclick="processFiles()" id="processBtn" disabled>Process Files</button>
+                            <button class="btn btn-secondary" onclick="indexProject()" id="indexBtn" disabled>Index Project</button>
+                        </div>
+                        
+                        <div class="loading" id="uploadLoading">
+                            <div class="spinner"></div>
+                            <p>Processing...</p>
+                        </div>
                     </div>
                     
-                    <button class="btn" onclick="uploadFile()">Upload File</button>
-                    <button class="btn btn-success" onclick="processFiles()">Process Files</button>
-                    <button class="btn btn-secondary" onclick="indexProject()">Index Project</button>
-                    
-                    <div class="loading" id="uploadLoading">
-                        <div class="spinner"></div>
-                        <p>Processing...</p>
+                    <!-- File Content Display Section -->
+                    <div class="file-content-section" id="fileContentSection" style="display: none;">
+                        <h4>📄 File Content Viewer</h4>
+                        <div class="file-info" id="fileInfo">
+                            <div class="file-details">
+                                <span id="fileName"></span>
+                                <span id="fileSize"></span>
+                                <span id="contentLength"></span>
+                            </div>
+                            <button class="btn btn-secondary" onclick="closeFileViewer()">✕ Close</button>
+                        </div>
+                        <div class="file-content-display" id="fileContentDisplay">
+                            <div class="content-container" id="contentContainer">
+                                <!-- File content will be displayed here -->
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -314,27 +617,51 @@
                     <h3>Ask Questions</h3>
                     <p>Ask questions about your uploaded documents.</p>
                     
-                    <div class="form-group">
-                        <label for="chatProjectId">Project ID</label>
-                        <input type="number" id="chatProjectId" value="1" min="1">
-                    </div>
-                    
-                    <div class="chat-container" id="chatContainer">
-                        <div class="message assistant">
-                            Hello! I'm your AI assistant. Ask me anything about your uploaded documents.
+                    <!-- Project Management Section -->
+                    <div class="project-management-section">
+                        <h4>📁 Project Selection</h4>
+                        
+                        <div class="project-selection-section">
+                            <div class="form-group">
+                                <label for="chatProjectSelect">Select Project for Chat</label>
+                                <select id="chatProjectSelect" onchange="updateChatProjectId()">
+                                    <option value="" disabled selected>No selected project</option>
+                                </select>
+                                <div class="project-actions">
+                                    <button class="btn btn-secondary" onclick="loadUserProjects()">🔄 Refresh Projects</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Project Status Display -->
+                        <div id="chatProjectStatus" class="project-status" style="display: none;">
+                            <div class="status-card">
+                                <h5>📋 Current Project Status</h5>
+                                <div id="chatProjectStatusContent"></div>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="questionInput">Your Question</label>
-                        <input type="text" id="questionInput" placeholder="Ask a question...">
-                    </div>
-                    
-                    <button class="btn" onclick="askQuestion()">Ask Question</button>
-                    
-                    <div class="loading" id="chatLoading">
-                        <div class="spinner"></div>
-                        <p>Thinking...</p>
+                    <!-- Chat Section -->
+                    <div class="chat-section">
+                        <h4>💬 Chat Interface</h4>
+                        <div class="chat-container" id="chatContainer">
+                            <div class="message assistant">
+                                Hello! I'm your AI assistant. Select a project and ask me anything about your uploaded documents.
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="questionInput">Your Question</label>
+                            <input type="text" id="questionInput" placeholder="Ask a question..." disabled>
+                        </div>
+                        
+                        <button class="btn" onclick="askQuestion()" id="askBtn" disabled>Ask Question</button>
+                        
+                        <div class="loading" id="chatLoading">
+                            <div class="spinner"></div>
+                            <p>Thinking...</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -350,23 +677,27 @@
             showApp();
         }
         
-        function showTab(tabName) {
+        function showTab(tabName, event = null) {
             // Hide all tabs
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
             
             // Show selected tab
-            event.target.classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
             document.getElementById(tabName + 'Tab').classList.add('active');
         }
         
-        function showAppTab(tabName) {
+        function showAppTab(tabName, event = null) {
             // Hide all tabs
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
             
             // Show selected tab
-            event.target.classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
             document.getElementById(tabName + 'Tab').classList.add('active');
         }
         
@@ -387,15 +718,46 @@
             status.className = `status ${type}`;
             status.style.display = 'block';
             
-            setTimeout(() => {
-                status.style.display = 'none';
-            }, 5000);
+            // For errors, make them more prominent and persistent
+            if (type === 'error') {
+                status.style.border = '2px solid #ff4444';
+                status.style.backgroundColor = '#ffebee';
+                status.style.color = '#c62828';
+                status.style.fontWeight = 'bold';
+                
+                // Auto-hide error messages after 15 seconds (longer for errors)
+                setTimeout(() => {
+                    status.style.display = 'none';
+                    status.style.border = '';
+                    status.style.backgroundColor = '';
+                    status.style.color = '';
+                    status.style.fontWeight = '';
+                }, 15000);
+            } else {
+                // Reset styling for non-error messages
+                status.style.border = '';
+                status.style.backgroundColor = '';
+                status.style.color = '';
+                status.style.fontWeight = '';
+                
+                // Auto-hide success messages after 5 seconds
+                if (type === 'success') {
+                    setTimeout(() => {
+                        status.style.display = 'none';
+                    }, 5000);
+                }
+            }
         }
         
         function showApp() {
             document.getElementById('authSection').classList.remove('active');
             document.getElementById('appSection').classList.add('active');
-            document.getElementById('userEmail').textContent = userEmail;
+            document.getElementById('userName').textContent = extractUsername(userEmail);
+        }
+        
+        function extractUsername(email) {
+            if (!email) return 'User';
+            return email.split('@')[0];
         }
         
         function logout() {
@@ -421,14 +783,35 @@
                 const data = await response.json();
                 
                 if (response.ok) {
-                    token = data.access_token;
-                    userEmail = document.getElementById('loginEmail').value;
-                    localStorage.setItem('token', token);
-                    localStorage.setItem('userEmail', userEmail);
-                    showApp();
-                    showStatus('Login successful!', 'success');
+                    // Handle new enhanced response format
+                    if (data.success && data.data) {
+                        token = data.data.access_token;
+                        userEmail = document.getElementById('loginEmail').value;
+                        localStorage.setItem('token', token);
+                        localStorage.setItem('userEmail', userEmail);
+                        showApp();
+                        showStatus('Login successful!', 'success');
+                    } else if (data.access_token) {
+                        // Fallback for old format
+                        token = data.access_token;
+                        userEmail = document.getElementById('loginEmail').value;
+                        localStorage.setItem('token', token);
+                        localStorage.setItem('userEmail', userEmail);
+                        showApp();
+                        showStatus('Login successful!', 'success');
+                    } else {
+                        showStatus('Login response format error', 'error');
+                    }
                 } else {
-                    showStatus(data.detail || 'Login failed', 'error');
+                    // Handle error responses
+                    if (data.error) {
+                        // Enhanced error format
+                        const errorMsg = data.error.message || data.error.title || 'Login failed';
+                        showStatus(errorMsg, 'error');
+                    } else {
+                        // Old error format
+                        showStatus(data.detail || 'Login failed', 'error');
+                    }
                 }
             } catch (error) {
                 showStatus('Login failed: ' + error.message, 'error');
@@ -456,10 +839,29 @@
                 const data = await response.json();
                 
                 if (response.ok) {
-                    showStatus('Registration successful! Please login.', 'success');
-                    showTab('login');
+                    // Handle new enhanced response format
+                    if (data.success) {
+                        showStatus('Registration successful! Please login.', 'success');
+                        showTab('login');
+                    } else if (data.error) {
+                        // Handle enhanced error format
+                        const errorMsg = data.error.message || data.error.title || 'Registration failed';
+                        showStatus(errorMsg, 'error');
+                    } else {
+                        // Fallback for old format
+                        showStatus('Registration successful! Please login.', 'success');
+                        showTab('login');
+                    }
                 } else {
-                    showStatus(data.detail || 'Registration failed', 'error');
+                    // Handle error responses
+                    if (data.error) {
+                        // Enhanced error format
+                        const errorMsg = data.error.message || data.error.title || 'Registration failed';
+                        showStatus(errorMsg, 'error');
+                    } else {
+                        // Old error format
+                        showStatus(data.detail || 'Registration failed', 'error');
+                    }
                 }
             } catch (error) {
                 showStatus('Registration failed: ' + error.message, 'error');
@@ -468,10 +870,14 @@
         
         async function uploadFile() {
             const fileInput = document.getElementById('fileInput');
-            const projectId = document.getElementById('projectId').value;
-            const file = fileInput.files[0];
+            const projectId = document.getElementById('projectSelect').value; // Use selected project ID
             
-            if (!file) {
+            if (!projectId) {
+                showAppStatus('Please select a project', 'error');
+                return;
+            }
+
+            if (!fileInput.files[0]) {
                 showAppStatus('Please select a file', 'error');
                 return;
             }
@@ -480,7 +886,7 @@
             loading.style.display = 'block';
             
             const formData = new FormData();
-            formData.append('file', file);
+            formData.append('file', fileInput.files[0]);
             
             try {
                 const response = await fetch(`/api/v1/data/upload/${projectId}`, {
@@ -496,6 +902,9 @@
                 if (response.ok) {
                     showAppStatus('File uploaded successfully!', 'success');
                     fileInput.value = '';
+                    
+                    // Refresh project list to show updated file count in dropdown
+                    await loadUserProjects();
                 } else {
                     showAppStatus(data.signal || 'Upload failed', 'error');
                 }
@@ -507,7 +916,7 @@
         }
         
         async function processFiles() {
-            const projectId = document.getElementById('projectId').value;
+            const projectId = document.getElementById('projectSelect').value; // Use selected project ID
             const loading = document.getElementById('uploadLoading');
             loading.style.display = 'block';
             
@@ -529,6 +938,9 @@
                 
                 if (response.ok) {
                     showAppStatus(`Files processed successfully! ${data.inserted_chunks} chunks created.`, 'success');
+                    
+                    // Refresh project list to show updated chunk count in dropdown
+                    await loadUserProjects();
                 } else {
                     showAppStatus(data.signal || 'Processing failed', 'error');
                 }
@@ -540,7 +952,7 @@
         }
         
         async function indexProject() {
-            const projectId = document.getElementById('projectId').value;
+            const projectId = document.getElementById('projectSelect').value; // Use selected project ID
             const loading = document.getElementById('uploadLoading');
             loading.style.display = 'block';
             
@@ -560,6 +972,9 @@
                 
                 if (response.ok) {
                     showAppStatus(`Project indexed successfully! ${data.inserted_items_count} items indexed.`, 'success');
+                    
+                    // Refresh project list to show updated indexing status in dropdown
+                    await loadUserProjects();
                 } else {
                     showAppStatus(data.signal || 'Indexing failed', 'error');
                 }
@@ -572,7 +987,7 @@
         
         async function askQuestion() {
             const question = document.getElementById('questionInput').value;
-            const projectId = document.getElementById('chatProjectId').value;
+            const projectId = document.getElementById('chatProjectSelect').value; // Use selected project ID
             
             if (!question.trim()) {
                 showAppStatus('Please enter a question', 'error');
@@ -630,6 +1045,402 @@
                 askQuestion();
             }
         });
+
+        async function loadUserProjects() {
+            const projectSelect = document.getElementById('projectSelect');
+            const chatProjectSelect = document.getElementById('chatProjectSelect');
+            
+            // Reset to default state
+            projectSelect.innerHTML = '<option value="" disabled selected>No selected project</option>';
+            chatProjectSelect.innerHTML = '<option value="" disabled selected>No selected project</option>';
+            
+            // Disable buttons initially
+            updateProjectId();
+            updateChatProjectId();
+
+            try {
+                const response = await fetch('/api/v1/data/projects', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+
+                if (response.ok && data.signal === 'PROJECTS_RETRIEVED') {
+                    if (data.projects && data.projects.length > 0) {
+                        data.projects.forEach(project => {
+                            const statusText = project.status === 'active' ? '✅ Indexed' : '⏳ Pending';
+                            const assetText = project.asset_count > 0 ? ` (${project.asset_count} files)` : '';
+                            const chunkText = project.chunk_count > 0 ? ` - ${project.chunk_count} chunks` : '';
+                            
+                            const option = document.createElement('option');
+                            option.value = project.project_code || project.project_id; // Use project_code if available, fallback to project_id
+                            option.textContent = `Project ${project.project_code || project.project_id}${assetText}${chunkText} - ${statusText}`;
+                            projectSelect.appendChild(option);
+                            
+                            const chatOption = document.createElement('option');
+                            chatOption.value = project.project_code || project.project_id; // Use project_code if available, fallback to project_id
+                            chatOption.textContent = `Project ${project.project_code || project.project_id}${assetText}${chunkText} - ${statusText}`;
+                            chatProjectSelect.appendChild(chatOption);
+                        });
+                        
+                        // Show project summary
+                        const totalProjects = data.projects.length;
+                        const indexedProjects = data.projects.filter(p => p.status === 'active').length;
+                        const totalAssets = data.projects.reduce((sum, p) => sum + p.asset_count, 0);
+                        const totalChunks = data.projects.reduce((sum, p) => sum + p.chunk_count, 0);
+                        
+                        showAppStatus(`Loaded ${totalProjects} projects (${indexedProjects} indexed, ${totalAssets} files, ${totalChunks} chunks)`, 'success');
+                        
+                        // Auto-select the first project if none is selected
+                        if (!projectSelect.value || projectSelect.value === '') {
+                            projectSelect.value = data.projects[0].project_code || data.projects[0].project_id;
+                            updateProjectId();
+                        } else {
+                            // Update details for currently selected project
+                            updateProjectId();
+                        }
+                    } else {
+                        showAppStatus('No projects found. Create your first project!', 'info');
+                    }
+                } else {
+                    showAppStatus('Failed to load projects: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                showAppStatus('Failed to load projects: ' + error.message, 'error');
+            }
+        }
+
+        async function createNewProject() {
+            const newProjectId = document.getElementById('newProjectId').value;
+            const projectSelect = document.getElementById('projectSelect');
+            const chatProjectSelect = document.getElementById('chatProjectSelect');
+
+            if (!newProjectId) {
+                showAppStatus('Please enter a project ID', 'error');
+                return;
+            }
+
+            // Validate project ID (must be a number)
+            if (isNaN(newProjectId) || parseInt(newProjectId) <= 0) {
+                showAppStatus('Project ID must be a positive number', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/v1/data/projects/create/${newProjectId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Handle new enhanced response format
+                    if (data.success) {
+                        showAppStatus(`Project ${newProjectId} created successfully!`, 'success');
+                        
+                        // Clear the input
+                        document.getElementById('newProjectId').value = '';
+                        
+                        // Reload projects to get updated information
+                        await loadUserProjects();
+                        
+                        // Select the new project
+                        projectSelect.value = newProjectId;
+                        updateProjectId();
+                    } else if (data.error) {
+                        // Handle enhanced error format
+                        const errorMsg = data.error.message || data.error.title || 'Failed to create project';
+                        showAppStatus(errorMsg, 'error');
+                    } else {
+                        // Fallback for old format
+                        showAppStatus(`Project ${newProjectId} created successfully!`, 'success');
+                        
+                        // Clear the input
+                        document.getElementById('newProjectId').value = '';
+                        
+                        // Reload projects to get updated information
+                        await loadUserProjects();
+                        
+                        // Select the new project
+                        projectSelect.value = newProjectId;
+                        updateProjectId();
+                    }
+                } else {
+                    // Handle error responses
+                    if (data.error) {
+                        // Enhanced error format
+                        const errorMsg = data.error.message || data.error.title || 'Failed to create project';
+                        showAppStatus(errorMsg, 'error');
+                        
+                        // If it's a duplicate project, show a more detailed message and reload
+                        if (data.error.code === 'PROJECT_ALREADY_EXISTS') {
+                            // Show a more detailed error message
+                            const detailedMsg = `Project ${newProjectId} already exists in your account. Please choose a different project number.`;
+                            showAppStatus(detailedMsg, 'error');
+                            
+                            // Clear the input
+                            document.getElementById('newProjectId').value = '';
+                            
+                            // Wait a bit before reloading to let user see the error
+                            setTimeout(async () => {
+                                await loadUserProjects();
+                                // Don't auto-select the existing project - let user choose
+                            }, 3000);
+                        }
+                    } else {
+                        // Old error format
+                        showAppStatus('Failed to create project: ' + (data.detail || data.message || 'Unknown error'), 'error');
+                    }
+                }
+            } catch (error) {
+                showAppStatus('Failed to create project: ' + error.message, 'error');
+            }
+        }
+
+        function updateProjectId() {
+            const projectSelect = document.getElementById('projectSelect');
+            const selectedProject = projectSelect.value;
+            const uploadBtn = document.getElementById('uploadBtn');
+            const processBtn = document.getElementById('processBtn');
+            const indexBtn = document.getElementById('indexBtn');
+            const projectStatus = document.getElementById('projectStatus');
+            
+            if (selectedProject && selectedProject !== '') {
+                uploadBtn.disabled = false;
+                processBtn.disabled = false;
+                indexBtn.disabled = false;
+                
+                // Show project status
+                showProjectStatus(selectedProject, 'projectStatusContent');
+                projectStatus.style.display = 'block';
+                
+                showAppStatus(`Selected project: ${selectedProject}`, 'success');
+            } else {
+                uploadBtn.disabled = true;
+                processBtn.disabled = true;
+                indexBtn.disabled = true;
+                projectStatus.style.display = 'none';
+            }
+        }
+
+        function updateChatProjectId() {
+            const chatProjectSelect = document.getElementById('chatProjectSelect');
+            const selectedProject = chatProjectSelect.value;
+            const questionInput = document.getElementById('questionInput');
+            const askBtn = document.getElementById('askBtn');
+            const chatProjectStatus = document.getElementById('chatProjectStatus');
+            
+            if (selectedProject && selectedProject !== '') {
+                questionInput.disabled = false;
+                askBtn.disabled = false;
+                
+                // Show project status
+                showProjectStatus(selectedProject, 'chatProjectStatusContent');
+                chatProjectStatus.style.display = 'block';
+                
+                showAppStatus(`Selected project for chat: ${selectedProject}`, 'success');
+            } else {
+                questionInput.disabled = true;
+                askBtn.disabled = true;
+                chatProjectStatus.style.display = 'none';
+            }
+        }
+
+        async function showProjectStatus(projectId, contentElementId) {
+            const details = await getProjectDetails(projectId);
+            const contentElement = document.getElementById(contentElementId);
+            
+            if (details) {
+                const statusIcon = details.is_indexed ? '✅' : '⏳';
+                const statusText = details.is_indexed ? 'Indexed' : 'Pending Indexing';
+                
+                // Create files list if assets exist
+                let filesList = '';
+                if (details.assets && details.assets.length > 0) {
+                    filesList = '<div class="files-section"><h6>📁 Files:</h6><div class="files-list">';
+                    details.assets.forEach(asset => {
+                        const fileSize = formatFileSize(asset.asset_size);
+                        filesList += `
+                            <div class="file-item" data-asset-id="${asset.asset_id}" onclick="displayFileContent(${asset.asset_id})">
+                                📄 ${asset.asset_name} (${fileSize})
+                            </div>
+                        `;
+                    });
+                    filesList += '</div></div>';
+                }
+                
+                contentElement.innerHTML = `
+                    <p><strong>Project ID:</strong> ${details.project_id}</p>
+                    <p><strong>Status:</strong> ${statusIcon} ${statusText}</p>
+                    <p><strong>Files:</strong> ${details.asset_count}</p>
+                    <p><strong>Chunks:</strong> ${details.chunk_count}</p>
+                    <p><strong>Vectors:</strong> ${details.vector_count}</p>
+                    <p><strong>Created:</strong> ${new Date(details.created_at).toLocaleString()}</p>
+                    ${filesList}
+                `;
+                
+                // Add click handlers to file items
+                setTimeout(() => {
+                    const fileItems = contentElement.querySelectorAll('.file-item');
+                    fileItems.forEach(item => {
+                        item.style.cursor = 'pointer';
+                        item.style.padding = '5px 10px';
+                        item.style.margin = '2px 0';
+                        item.style.backgroundColor = '#f0f8ff';
+                        item.style.border = '1px solid #ddd';
+                        item.style.borderRadius = '4px';
+                        item.style.transition = 'background-color 0.2s';
+                        
+                        item.addEventListener('mouseenter', function() {
+                            this.style.backgroundColor = '#e6f3ff';
+                        });
+                        
+                        item.addEventListener('mouseleave', function() {
+                            this.style.backgroundColor = '#f0f8ff';
+                        });
+                    });
+                }, 100);
+            } else {
+                contentElement.innerHTML = '<p>Unable to load project details</p>';
+            }
+        }
+
+        async function getProjectDetails(projectId) {
+            if (!projectId) {
+                return null;
+            }
+
+            try {
+                const response = await fetch(`/api/v1/data/projects/${projectId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+
+                if (response.ok && data.signal === 'PROJECT_DETAILS_RETRIEVED') {
+                    return data.project;
+                } else {
+                    showAppStatus('Failed to get project details: ' + (data.error || 'Unknown error'), 'error');
+                    return null;
+                }
+            } catch (error) {
+                showAppStatus('Failed to get project details: ' + error.message, 'error');
+                return null;
+            }
+        }
+
+        async function showProjectDetails(projectId) {
+            const details = await getProjectDetails(projectId);
+            if (details) {
+                const statusText = details.is_indexed ? '✅ Indexed' : '⏳ Pending Indexing';
+                const message = `Project ${details.project_id} Details:
+• Status: ${statusText}
+• Files: ${details.asset_count}
+• Chunks: ${details.chunk_count}
+• Vectors: ${details.vector_count}
+• Created: ${new Date(details.created_at).toLocaleString()}`;
+                
+                showAppStatus(message, 'info');
+            }
+        }
+
+        // Load projects when user logs in
+        if (token) {
+            loadUserProjects();
+        }
+
+        // File Content Display Functions
+        async function displayFileContent(assetId) {
+            const projectSelect = document.getElementById('projectSelect');
+            const selectedProject = projectSelect.value;
+            
+            if (!selectedProject) {
+                showAppStatus('Please select a project first', 'error');
+                return;
+            }
+
+            if (!assetId) {
+                showAppStatus('No file selected', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/v1/data/file/content/${selectedProject}/${assetId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.signal === 'FILE_CONTENT_RETRIEVED') {
+                    // Show file content section
+                    const fileContentSection = document.getElementById('fileContentSection');
+                    const fileName = document.getElementById('fileName');
+                    const fileSize = document.getElementById('fileSize');
+                    const contentLength = document.getElementById('contentLength');
+                    const contentContainer = document.getElementById('contentContainer');
+                    
+                    // Update file info
+                    fileName.textContent = `📄 ${data.file_name}`;
+                    fileSize.textContent = `📏 ${formatFileSize(data.file_size)}`;
+                    contentLength.textContent = `📝 ${data.content_length} characters`;
+                    
+                    // Display content
+                    contentContainer.textContent = data.content;
+                    
+                    // Show the section
+                    fileContentSection.style.display = 'block';
+                    
+                    // Scroll to the file content section
+                    fileContentSection.scrollIntoView({ behavior: 'smooth' });
+                    
+                    showAppStatus('File content loaded successfully', 'success');
+                } else {
+                    showAppStatus('Failed to load file content: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                showAppStatus('Failed to load file content: ' + error.message, 'error');
+            }
+        }
+
+        function closeFileViewer() {
+            const fileContentSection = document.getElementById('fileContentSection');
+            fileContentSection.style.display = 'none';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Add click handler for file selection
+        function addFileClickHandlers() {
+            // This function will be called when project details are loaded
+            // to add click handlers to file elements
+            const projectStatusContent = document.getElementById('projectStatusContent');
+            if (projectStatusContent) {
+                // Add click handlers to file elements if they exist
+                const fileElements = projectStatusContent.querySelectorAll('.file-item');
+                fileElements.forEach(fileElement => {
+                    fileElement.style.cursor = 'pointer';
+                    fileElement.addEventListener('click', function() {
+                        const assetId = this.getAttribute('data-asset-id');
+                        if (assetId) {
+                            displayFileContent(assetId);
+                        }
+                    });
+                });
+            }
+        }
     </script>
 </body>
 </html> 
