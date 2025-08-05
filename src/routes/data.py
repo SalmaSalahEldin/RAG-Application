@@ -436,16 +436,23 @@ async def process_endpoint(request: Request, project_code: int, process_request:
                 continue
 
             # Create chunk records
-            file_chunks_records = [
-                DataChunk(
+            file_chunks_records = []
+            for i, chunk in enumerate(file_chunks):
+                # Add asset_id to metadata for vector deletion
+                chunk_metadata = chunk.metadata.copy() if chunk.metadata else {}
+                chunk_metadata.update({
+                    "asset_id": asset_id,
+                    "project_id": project.project_id,
+                    "chunk_id": i + 1
+                })
+                
+                file_chunks_records.append(DataChunk(
                     chunk_text=chunk.page_content,
-                    chunk_metadata=chunk.metadata,
+                    chunk_metadata=chunk_metadata,
                     chunk_order=i+1,
                     chunk_project_id=project.project_id,
                     chunk_asset_id=asset_id
-                )
-                for i, chunk in enumerate(file_chunks)
-            ]
+                ))
 
             # Insert chunks into database
             chunk_count = await chunk_model.insert_many_chunks(chunks=file_chunks_records)

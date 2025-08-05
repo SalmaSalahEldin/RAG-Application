@@ -246,6 +246,20 @@ class QdrantDBProvider(VectorDBInterface):
                 self.logger.warning(f"Collection {collection_name} does not exist")
                 return False
             
+            self.logger.info(f"Attempting to delete vectors with filter: {filter_condition}")
+            
+            # First, let's check what's actually in the collection
+            try:
+                # Get a sample of points to understand the structure
+                sample_points = self.client.scroll(
+                    collection_name=collection_name,
+                    limit=5,
+                    with_payload=True
+                )
+                self.logger.info(f"Sample points in collection {collection_name}: {sample_points}")
+            except Exception as e:
+                self.logger.warning(f"Could not get sample points: {e}")
+            
             # Convert filter condition to Qdrant filter format
             qdrant_filter = self._convert_filter_to_qdrant(filter_condition)
             
@@ -253,15 +267,17 @@ class QdrantDBProvider(VectorDBInterface):
                 self.logger.warning("Invalid filter condition provided")
                 return False
             
+            self.logger.info(f"Converted filter to Qdrant format: {qdrant_filter}")
+            
             # Delete vectors by filter
-            self.client.delete(
+            result = self.client.delete(
                 collection_name=collection_name,
                 points_selector=models.FilterSelector(
                     filter=qdrant_filter
                 )
             )
             
-            self.logger.info(f"Successfully deleted vectors matching filter from collection {collection_name}")
+            self.logger.info(f"Successfully deleted vectors matching filter from collection {collection_name}. Result: {result}")
             return True
             
         except Exception as e:
@@ -283,6 +299,8 @@ class QdrantDBProvider(VectorDBInterface):
             
             for key, value in filter_condition.items():
                 if key == "asset_id":
+                    # The metadata is stored as a nested structure in the payload
+                    # Try the correct path: metadata.asset_id
                     conditions.append(
                         models.FieldCondition(
                             key="metadata.asset_id",
@@ -306,6 +324,7 @@ class QdrantDBProvider(VectorDBInterface):
                 # Add more filter conditions as needed
             
             if conditions:
+                # Use 'must' since we want to match all conditions
                 return models.Filter(
                     must=conditions
                 )

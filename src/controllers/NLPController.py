@@ -166,9 +166,12 @@ class NLPController(BaseController):
         """
         try:
             collection_name = self.create_collection_name(project_id=project.project_id)
+            print(f"Attempting to delete vectors for asset {asset_id} from collection {collection_name}")
             
             # Delete vectors by filter (asset_id)
             filter_condition = {"asset_id": asset_id}
+            print(f"Using filter condition: {filter_condition}")
+            
             success = await self.vectordb_client.delete_vectors_by_filter(
                 collection_name=collection_name,
                 filter_condition=filter_condition
@@ -183,6 +186,8 @@ class NLPController(BaseController):
             
         except Exception as e:
             print(f"Error deleting vectors for asset {asset_id}: {e}")
+            import traceback
+            traceback.print_exc()
             return False
 
     async def delete_vectors_by_chunk_ids(self, project: Project, chunk_ids: List[int]) -> bool:
