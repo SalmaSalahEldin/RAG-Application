@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini-RAG - AI Question Answering</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .auth-section {
+            display: none;
+            margin-bottom: 40px;
+        }
+        
+        .auth-section.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-success {
+            background: #28a745;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+        }
+        
+        .file-upload {
+            border: 2px dashed #e1e5e9;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: border-color 0.3s;
+        }
+        
+        .file-upload:hover {
+            border-color: #667eea;
+        }
+        
+        .file-upload input[type="file"] {
+            display: none;
+        }
+        
+        .file-upload label {
+            cursor: pointer;
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .chat-container {
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            max-width: 80%;
+        }
+        
+        .message.user {
+            background: #e3f2fd;
+            margin-left: auto;
+        }
+        
+        .message.assistant {
+            background: #f5f5f5;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e1e5e9;
+        }
+        
+        .tab {
+            padding: 15px 30px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            border-bottom-color: #667eea;
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Mini-RAG</h1>
+            <p>AI-Powered Question Answering System</p>
+        </div>
+        
+        <div class="content">
+            <!-- Authentication Section -->
+            <div id="authSection" class="auth-section active">
+                <h2>Authentication</h2>
+                <div class="status" id="authStatus"></div>
+                
+                <div class="tabs">
+                    <div class="tab active" onclick="showTab('login')">Login</div>
+                    <div class="tab" onclick="showTab('register')">Register</div>
+                </div>
+                
+                <div id="loginTab" class="tab-content active">
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="loginEmail">Email</label>
+                            <input type="email" id="loginEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">Password</label>
+                            <input type="password" id="loginPassword" required>
+                        </div>
+                        <button type="submit" class="btn">Login</button>
+                    </form>
+                </div>
+                
+                <div id="registerTab" class="tab-content">
+                    <form id="registerForm">
+                        <div class="form-group">
+                            <label for="registerEmail">Email</label>
+                            <input type="email" id="registerEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword">Password</label>
+                            <input type="password" id="registerPassword" required>
+                        </div>
+                        <button type="submit" class="btn">Register</button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Main Application Section -->
+            <div id="appSection" class="auth-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2>Welcome, <span id="userEmail"></span>!</h2>
+                    <button class="btn btn-danger" onclick="logout()">Logout</button>
+                </div>
+                
+                <div class="status" id="appStatus"></div>
+                
+                <div class="tabs">
+                    <div class="tab active" onclick="showAppTab('upload')">Upload Documents</div>
+                    <div class="tab" onclick="showAppTab('chat')">Ask Questions</div>
+                </div>
+                
+                <div id="uploadTab" class="tab-content active">
+                    <h3>Upload Documents</h3>
+                    <p>Upload your documents (PDF, TXT) to create a knowledge base for question answering.</p>
+                    
+                    <div class="form-group">
+                        <label for="projectId">Project ID</label>
+                        <input type="number" id="projectId" value="1" min="1">
+                    </div>
+                    
+                    <div class="file-upload">
+                        <input type="file" id="fileInput" accept=".pdf,.txt">
+                        <label for="fileInput">📁 Choose a file or drag it here</label>
+                    </div>
+                    
+                    <button class="btn" onclick="uploadFile()">Upload File</button>
+                    <button class="btn btn-success" onclick="processFiles()">Process Files</button>
+                    <button class="btn btn-secondary" onclick="indexProject()">Index Project</button>
+                    
+                    <div class="loading" id="uploadLoading">
+                        <div class="spinner"></div>
+                        <p>Processing...</p>
+                    </div>
+                </div>
+                
+                <div id="chatTab" class="tab-content">
+                    <h3>Ask Questions</h3>
+                    <p>Ask questions about your uploaded documents.</p>
+                    
+                    <div class="form-group">
+                        <label for="chatProjectId">Project ID</label>
+                        <input type="number" id="chatProjectId" value="1" min="1">
+                    </div>
+                    
+                    <div class="chat-container" id="chatContainer">
+                        <div class="message assistant">
+                            Hello! I'm your AI assistant. Ask me anything about your uploaded documents.
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="questionInput">Your Question</label>
+                        <input type="text" id="questionInput" placeholder="Ask a question...">
+                    </div>
+                    
+                    <button class="btn" onclick="askQuestion()">Ask Question</button>
+                    
+                    <div class="loading" id="chatLoading">
+                        <div class="spinner"></div>
+                        <p>Thinking...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let token = localStorage.getItem('token');
+        let userEmail = localStorage.getItem('userEmail');
+        
+        // Check if user is already logged in
+        if (token) {
+            showApp();
+        }
+        
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Show selected tab
+            event.target.classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+        
+        function showAppTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Show selected tab
+            event.target.classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+        
+        function showStatus(message, type = 'success') {
+            const status = document.getElementById('authStatus');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 5000);
+        }
+        
+        function showAppStatus(message, type = 'success') {
+            const status = document.getElementById('appStatus');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 5000);
+        }
+        
+        function showApp() {
+            document.getElementById('authSection').classList.remove('active');
+            document.getElementById('appSection').classList.add('active');
+            document.getElementById('userEmail').textContent = userEmail;
+        }
+        
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userEmail');
+            location.reload();
+        }
+        
+        // Login form
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('username', document.getElementById('loginEmail').value);
+            formData.append('password', document.getElementById('loginPassword').value);
+            
+            try {
+                const response = await fetch('/auth/login', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    token = data.access_token;
+                    userEmail = document.getElementById('loginEmail').value;
+                    localStorage.setItem('token', token);
+                    localStorage.setItem('userEmail', userEmail);
+                    showApp();
+                    showStatus('Login successful!', 'success');
+                } else {
+                    showStatus(data.detail || 'Login failed', 'error');
+                }
+            } catch (error) {
+                showStatus('Login failed: ' + error.message, 'error');
+            }
+        });
+        
+        // Register form
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userData = {
+                email: document.getElementById('registerEmail').value,
+                password: document.getElementById('registerPassword').value
+            };
+            
+            try {
+                const response = await fetch('/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showStatus('Registration successful! Please login.', 'success');
+                    showTab('login');
+                } else {
+                    showStatus(data.detail || 'Registration failed', 'error');
+                }
+            } catch (error) {
+                showStatus('Registration failed: ' + error.message, 'error');
+            }
+        });
+        
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const projectId = document.getElementById('projectId').value;
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showAppStatus('Please select a file', 'error');
+                return;
+            }
+            
+            const loading = document.getElementById('uploadLoading');
+            loading.style.display = 'block';
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch(`/api/v1/data/upload/${projectId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showAppStatus('File uploaded successfully!', 'success');
+                    fileInput.value = '';
+                } else {
+                    showAppStatus(data.signal || 'Upload failed', 'error');
+                }
+            } catch (error) {
+                showAppStatus('Upload failed: ' + error.message, 'error');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        async function processFiles() {
+            const projectId = document.getElementById('projectId').value;
+            const loading = document.getElementById('uploadLoading');
+            loading.style.display = 'block';
+            
+            try {
+                const response = await fetch(`/api/v1/data/process/${projectId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        chunk_size: 100,
+                        overlap_size: 20,
+                        do_reset: 0
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showAppStatus(`Files processed successfully! ${data.inserted_chunks} chunks created.`, 'success');
+                } else {
+                    showAppStatus(data.signal || 'Processing failed', 'error');
+                }
+            } catch (error) {
+                showAppStatus('Processing failed: ' + error.message, 'error');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        async function indexProject() {
+            const projectId = document.getElementById('projectId').value;
+            const loading = document.getElementById('uploadLoading');
+            loading.style.display = 'block';
+            
+            try {
+                const response = await fetch(`/api/v1/nlp/index/push/${projectId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        do_reset: 0
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showAppStatus(`Project indexed successfully! ${data.inserted_items_count} items indexed.`, 'success');
+                } else {
+                    showAppStatus(data.signal || 'Indexing failed', 'error');
+                }
+            } catch (error) {
+                showAppStatus('Indexing failed: ' + error.message, 'error');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        async function askQuestion() {
+            const question = document.getElementById('questionInput').value;
+            const projectId = document.getElementById('chatProjectId').value;
+            
+            if (!question.trim()) {
+                showAppStatus('Please enter a question', 'error');
+                return;
+            }
+            
+            const loading = document.getElementById('chatLoading');
+            const chatContainer = document.getElementById('chatContainer');
+            
+            loading.style.display = 'block';
+            
+            // Add user message
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user';
+            userMessage.textContent = question;
+            chatContainer.appendChild(userMessage);
+            
+            try {
+                const response = await fetch(`/api/v1/nlp/index/answer/${projectId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        text: question,
+                        limit: 5
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Add assistant message
+                    const assistantMessage = document.createElement('div');
+                    assistantMessage.className = 'message assistant';
+                    assistantMessage.textContent = data.answer;
+                    chatContainer.appendChild(assistantMessage);
+                    
+                    document.getElementById('questionInput').value = '';
+                } else {
+                    showAppStatus(data.signal || 'Failed to get answer', 'error');
+                }
+            } catch (error) {
+                showAppStatus('Failed to get answer: ' + error.message, 'error');
+            } finally {
+                loading.style.display = 'none';
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        }
+        
+        // Enter key to ask question
+        document.getElementById('questionInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                askQuestion();
+            }
+        });
+    </script>
+</body>
+</html> 
