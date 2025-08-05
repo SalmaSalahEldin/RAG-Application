@@ -65,3 +65,992 @@ test_simple_output.txt
 *.tmp
 *.temp
 
+# Docker-related files and directories
+# Docker containers and images
+docker/
+docker-compose.yml
+docker-compose.yaml
+docker-compose.override.yml
+docker-compose.override.yaml
+Dockerfile
+Dockerfile.*
+.dockerignore
+
+# Docker volumes and data
+qdrant_storage/
+postgres_data/
+mongodata/
+pgvector_data/
+vector_db/
+*.volume
+
+# Docker runtime files
+.docker/
+docker-data/
+docker-volumes/
+
+# Docker environment files
+docker.env
+docker-compose.env
+
+# Docker logs
+docker-compose.log
+docker.log
+
+# Docker networks
+docker-network/
+
+# Docker secrets
+docker-secrets/
+
+# Docker configs
+docker-configs/
+
+# Docker build context
+.dockerignore
+docker-build/
+
+# Docker development files
+docker-dev/
+docker-development/
+
+# Docker production files
+docker-prod/
+docker-production/
+
+# Docker test files
+docker-test/
+docker-testing/
+
+# Docker backup files
+docker-backup/
+*.docker.backup
+
+# Docker cache
+.docker-cache/
+docker-cache/
+
+# Docker temporary files
+docker-tmp/
+docker-temp/
+*.docker.tmp
+*.docker.temp
+
+# Docker state files
+docker-state/
+.docker-state/
+
+# Docker runtime state
+docker-runtime/
+.docker-runtime/
+
+# Docker compose override files
+docker-compose.override.*
+docker-compose.*.yml
+docker-compose.*.yaml
+
+# Docker development overrides
+docker-compose.dev.yml
+docker-compose.dev.yaml
+docker-compose.development.yml
+docker-compose.development.yaml
+
+# Docker test overrides
+docker-compose.test.yml
+docker-compose.test.yaml
+docker-compose.testing.yml
+docker-compose.testing.yaml
+
+# Docker production overrides
+docker-compose.prod.yml
+docker-compose.prod.yaml
+docker-compose.production.yml
+docker-compose.production.yaml
+
+# Docker local overrides
+docker-compose.local.yml
+docker-compose.local.yaml
+
+# Docker override files for different environments
+docker-compose.*.override.yml
+docker-compose.*.override.yaml
+
+# Docker build artifacts
+.docker-build/
+docker-build/
+build/
+dist/
+
+# Docker images
+*.tar
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+
+# Docker container logs
+container-logs/
+docker-logs/
+*.container.log
+*.docker.log
+
+# Docker volume data
+volume-data/
+docker-volumes/
+volumes/
+
+# Docker network configurations
+docker-networks/
+networks/
+
+# Docker secrets
+docker-secrets/
+secrets/
+
+# Docker configs
+docker-configs/
+configs/
+
+# Docker swarm files
+docker-stack.yml
+docker-stack.yaml
+*.stack.yml
+*.stack.yaml
+
+# Docker machine files
+docker-machine/
+.docker-machine/
+
+# Docker context files
+.docker-context/
+docker-context/
+
+# Docker registry files
+.docker-registry/
+docker-registry/
+
+# Docker daemon files
+.docker-daemon/
+docker-daemon/
+
+# Docker client files
+.docker-client/
+docker-client/
+
+# Docker API files
+.docker-api/
+docker-api/
+
+# Docker plugin files
+.docker-plugin/
+docker-plugin/
+
+# Docker extension files
+.docker-extension/
+docker-extension/
+
+# Docker CLI files
+.docker-cli/
+docker-cli/
+
+# Docker desktop files
+.docker-desktop/
+docker-desktop/
+
+# Docker toolbox files
+.docker-toolbox/
+docker-toolbox/
+
+# Docker compose v2 files
+compose.yaml
+compose.yml
+compose.override.yaml
+compose.override.yml
+
+# Docker compose v2 environment files
+compose.env
+compose.*.env
+
+# Docker compose v2 override files
+compose.*.override.yaml
+compose.*.override.yml
+
+# Docker compose v2 development files
+compose.dev.yaml
+compose.dev.yml
+compose.development.yaml
+compose.development.yml
+
+# Docker compose v2 test files
+compose.test.yaml
+compose.test.yml
+compose.testing.yaml
+compose.testing.yml
+
+# Docker compose v2 production files
+compose.prod.yaml
+compose.prod.yml
+compose.production.yaml
+compose.production.yml
+
+# Docker compose v2 local files
+compose.local.yaml
+compose.local.yml
+
+# Docker compose v2 override files for different environments
+compose.*.override.yaml
+compose.*.override.yml
+
+# Docker compose v2 build artifacts
+compose-build/
+.compose-build/
+
+# Docker compose v2 logs
+compose-logs/
+.compose-logs/
+*.compose.log
+
+# Docker compose v2 volume data
+compose-volumes/
+.compose-volumes/
+
+# Docker compose v2 networks
+compose-networks/
+.compose-networks/
+
+# Docker compose v2 secrets
+compose-secrets/
+.compose-secrets/
+
+# Docker compose v2 configs
+compose-configs/
+.compose-configs/
+
+# Docker compose v2 state files
+compose-state/
+.compose-state/
+
+# Docker compose v2 runtime files
+compose-runtime/
+.compose-runtime/
+
+# Docker compose v2 temporary files
+compose-tmp/
+compose-temp/
+.compose-tmp/
+.compose-temp/
+*.compose.tmp
+*.compose.temp
+
+# Docker compose v2 cache
+compose-cache/
+.compose-cache/
+
+# Docker compose v2 backup files
+compose-backup/
+.compose-backup/
+*.compose.backup
+
+# Docker compose v2 development overrides
+compose.dev.override.yaml
+compose.dev.override.yml
+compose.development.override.yaml
+compose.development.override.yml
+
+# Docker compose v2 test overrides
+compose.test.override.yaml
+compose.test.override.yml
+compose.testing.override.yaml
+compose.testing.override.yml
+
+# Docker compose v2 production overrides
+compose.prod.override.yaml
+compose.prod.override.yml
+compose.production.override.yaml
+compose.production.override.yml
+
+# Docker compose v2 local overrides
+compose.local.override.yaml
+compose.local.override.yml
+
+# Docker compose v2 override files for different environments
+compose.*.override.yaml
+compose.*.override.yml
+
+# Docker compose v2 build context
+compose-build-context/
+.compose-build-context/
+
+# Docker compose v2 development context
+compose-dev-context/
+.compose-dev-context/
+
+# Docker compose v2 test context
+compose-test-context/
+.compose-test-context/
+
+# Docker compose v2 production context
+compose-prod-context/
+.compose-prod-context/
+
+# Docker compose v2 local context
+compose-local-context/
+.compose-local-context/
+
+# Docker compose v2 override context
+compose-override-context/
+.compose-override-context/
+
+# Docker compose v2 environment context
+compose-env-context/
+.compose-env-context/
+
+# Docker compose v2 volume context
+compose-volume-context/
+.compose-volume-context/
+
+# Docker compose v2 network context
+compose-network-context/
+.compose-network-context/
+
+# Docker compose v2 secret context
+compose-secret-context/
+.compose-secret-context/
+
+# Docker compose v2 config context
+compose-config-context/
+.compose-config-context/
+
+# Docker compose v2 state context
+compose-state-context/
+.compose-state-context/
+
+# Docker compose v2 runtime context
+compose-runtime-context/
+.compose-runtime-context/
+
+# Docker compose v2 temporary context
+compose-tmp-context/
+compose-temp-context/
+.compose-tmp-context/
+.compose-temp-context/
+
+# Docker compose v2 cache context
+compose-cache-context/
+.compose-cache-context/
+
+# Docker compose v2 backup context
+compose-backup-context/
+.compose-backup-context/
+
+# GitHub-specific files
+.github/
+.github/workflows/
+.github/actions/
+.github/ISSUE_TEMPLATE/
+.github/PULL_REQUEST_TEMPLATE.md
+.github/CODEOWNERS
+.github/SECURITY.md
+.github/SUPPORT.md
+.github/CONTRIBUTING.md
+.github/CHANGELOG.md
+.github/RELEASE.md
+.github/RELEASES.md
+.github/RELEASE_NOTES.md
+.github/RELEASE_NOTES.md
+.github/RELEASE_NOTES.txt
+.github/RELEASE_NOTES.txt
+.github/RELEASE_NOTES.rst
+.github/RELEASE_NOTES.rst
+.github/RELEASE_NOTES.html
+.github/RELEASE_NOTES.html
+.github/RELEASE_NOTES.xml
+.github/RELEASE_NOTES.xml
+.github/RELEASE_NOTES.json
+.github/RELEASE_NOTES.json
+.github/RELEASE_NOTES.yaml
+.github/RELEASE_NOTES.yaml
+.github/RELEASE_NOTES.yml
+.github/RELEASE_NOTES.yml
+
+# GitHub Pages
+.github/pages/
+.github/pages.yml
+.github/pages.yaml
+.github/pages.json
+.github/pages.html
+.github/pages.xml
+.github/pages.txt
+.github/pages.rst
+.github/pages.md
+
+# GitHub Actions
+.github/actions/
+.github/workflows/
+.github/workflows/*.yml
+.github/workflows/*.yaml
+.github/workflows/*.json
+.github/workflows/*.xml
+.github/workflows/*.txt
+.github/workflows/*.rst
+.github/workflows/*.md
+.github/workflows/*.html
+
+# GitHub Issues
+.github/ISSUE_TEMPLATE/
+.github/ISSUE_TEMPLATE/*.yml
+.github/ISSUE_TEMPLATE/*.yaml
+.github/ISSUE_TEMPLATE/*.json
+.github/ISSUE_TEMPLATE/*.xml
+.github/ISSUE_TEMPLATE/*.txt
+.github/ISSUE_TEMPLATE/*.rst
+.github/ISSUE_TEMPLATE/*.md
+.github/ISSUE_TEMPLATE/*.html
+
+# GitHub Pull Requests
+.github/PULL_REQUEST_TEMPLATE.md
+.github/PULL_REQUEST_TEMPLATE.yml
+.github/PULL_REQUEST_TEMPLATE.yaml
+.github/PULL_REQUEST_TEMPLATE.json
+.github/PULL_REQUEST_TEMPLATE.xml
+.github/PULL_REQUEST_TEMPLATE.txt
+.github/PULL_REQUEST_TEMPLATE.rst
+.github/PULL_REQUEST_TEMPLATE.html
+
+# GitHub Code Owners
+.github/CODEOWNERS
+.github/CODEOWNERS.yml
+.github/CODEOWNERS.yaml
+.github/CODEOWNERS.json
+.github/CODEOWNERS.xml
+.github/CODEOWNERS.txt
+.github/CODEOWNERS.rst
+.github/CODEOWNERS.md
+.github/CODEOWNERS.html
+
+# GitHub Security
+.github/SECURITY.md
+.github/SECURITY.yml
+.github/SECURITY.yaml
+.github/SECURITY.json
+.github/SECURITY.xml
+.github/SECURITY.txt
+.github/SECURITY.rst
+.github/SECURITY.html
+
+# GitHub Support
+.github/SUPPORT.md
+.github/SUPPORT.yml
+.github/SUPPORT.yaml
+.github/SUPPORT.json
+.github/SUPPORT.xml
+.github/SUPPORT.txt
+.github/SUPPORT.rst
+.github/SUPPORT.html
+
+# GitHub Contributing
+.github/CONTRIBUTING.md
+.github/CONTRIBUTING.yml
+.github/CONTRIBUTING.yaml
+.github/CONTRIBUTING.json
+.github/CONTRIBUTING.xml
+.github/CONTRIBUTING.txt
+.github/CONTRIBUTING.rst
+.github/CONTRIBUTING.html
+
+# GitHub Changelog
+.github/CHANGELOG.md
+.github/CHANGELOG.yml
+.github/CHANGELOG.yaml
+.github/CHANGELOG.json
+.github/CHANGELOG.xml
+.github/CHANGELOG.txt
+.github/CHANGELOG.rst
+.github/CHANGELOG.html
+
+# GitHub Release
+.github/RELEASE.md
+.github/RELEASE.yml
+.github/RELEASE.yaml
+.github/RELEASE.json
+.github/RELEASE.xml
+.github/RELEASE.txt
+.github/RELEASE.rst
+.github/RELEASE.html
+
+# GitHub Releases
+.github/RELEASES.md
+.github/RELEASES.yml
+.github/RELEASES.yaml
+.github/RELEASES.json
+.github/RELEASES.xml
+.github/RELEASES.txt
+.github/RELEASES.rst
+.github/RELEASES.html
+
+# GitHub Release Notes
+.github/RELEASE_NOTES.md
+.github/RELEASE_NOTES.yml
+.github/RELEASE_NOTES.yaml
+.github/RELEASE_NOTES.json
+.github/RELEASE_NOTES.xml
+.github/RELEASE_NOTES.txt
+.github/RELEASE_NOTES.rst
+.github/RELEASE_NOTES.html
+
+# Additional common files to ignore
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+*.save
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+*.log
+*.pid
+*.seed
+*.pid.lock
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
+.grunt
+
+# Bower dependency directory (https://bower.io/)
+bower_components
+
+# node_modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.test
+.env.production
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# next.js build output
+.next
+
+# nuxt.js build output
+.nuxt
+
+# vuepress build output
+.vuepress/dist
+
+# Serverless directories
+.serverless/
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# yarn v2
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Application-specific files
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# Configuration files with sensitive data
+config.json
+config.yml
+config.yaml
+secrets.json
+secrets.yml
+secrets.yaml
+
+# API keys and tokens
+api_keys.txt
+tokens.txt
+credentials.json
+credentials.yml
+credentials.yaml
+
+# Local development files
+local_settings.py
+local_config.py
+dev_settings.py
+dev_config.py
+
+# Test output files
+test_output/
+test_results/
+coverage/
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Documentation build files
+docs/_build/
+docs/build/
+site/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# PyCharm
+.idea/
+
+# VSCode
+.vscode/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Local development
+local/
+dev/
+development/
+staging/
+production/
+
+# Backup and archive files
+*.tar
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.zip
+*.rar
+*.7z
+*.gz
+*.bz2
+*.xz
+
+# Log files
+logs/
+*.log
+*.log.*
+log/
+debug.log
+error.log
+access.log
+
+# Cache directories
+cache/
+.cache/
+tmp/
+temp/
+.tmp/
+.temp/
+
+# Lock files
+*.lock
+.lock/
+lock/
+
+# State files
+state/
+.state/
+*.state
+*.state.*
+
+# Runtime files
+runtime/
+.runtime/
+*.runtime
+*.runtime.*
+
+# Temporary directories
+tmp/
+temp/
+.tmp/
+.temp/
+*.tmp/
+*.temp/
+
+# Build directories
+build/
+dist/
+out/
+target/
+*.build/
+*.dist/
+*.out/
+*.target/
+
+# Package directories
+node_modules/
+vendor/
+packages/
+*.package/
+*.packages/
+
+# Dependency directories
+dependencies/
+.dependencies/
+*.deps/
+*.dependencies/
+
+# Library directories
+lib/
+libs/
+library/
+libraries/
+*.lib/
+*.libs/
+*.library/
+*.libraries/
+
+# Binary files
+*.exe
+*.dll
+*.so
+*.dylib
+*.bin
+*.app
+*.dmg
+*.pkg
+*.deb
+*.rpm
+*.msi
+*.msm
+*.msp
+
+# Object files
+*.o
+*.obj
+*.ko
+*.elf
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Kernel Module Compile Results
+*.mod*
+*.cmd
+.tmp_versions/
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf
+
+# System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+

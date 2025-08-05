@@ -48,6 +48,39 @@ class ChunkModel(BaseDataModel):
             await session.commit()
         return result.rowcount
     
+    async def delete_chunks_by_asset_id(self, asset_id: int):
+        """
+        Delete all chunks for a specific asset.
+        
+        Args:
+            asset_id: The asset ID
+            
+        Returns:
+            Number of deleted chunks
+        """
+        async with self.db_client() as session:
+            async with session.begin():
+                stmt = delete(DataChunk).where(DataChunk.chunk_asset_id == asset_id)
+                result = await session.execute(stmt)
+                await session.commit()
+        return result.rowcount
+    
+    async def get_chunks_by_asset_id(self, asset_id: int):
+        """
+        Get all chunks for a specific asset.
+        
+        Args:
+            asset_id: The asset ID
+            
+        Returns:
+            List of chunks for the asset
+        """
+        async with self.db_client() as session:
+            stmt = select(DataChunk).where(DataChunk.chunk_asset_id == asset_id)
+            result = await session.execute(stmt)
+            records = result.scalars().all()
+        return records
+    
     async def get_project_chunks(self, project_id: int, page_no: int=1, page_size: int=50):
         async with self.db_client() as session:
             stmt = select(DataChunk).where(DataChunk.chunk_project_id == project_id).offset((page_no - 1) * page_size).limit(page_size)

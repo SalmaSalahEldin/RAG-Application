@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini-RAG - AI Question Answering</title>
+    <title>RAG - AI Question Answering</title>
     <style>
         * {
             margin: 0;
@@ -449,6 +449,9 @@
             font-size: 0.85em;
             transition: all 0.2s ease;
             user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .file-item:hover {
@@ -463,6 +466,51 @@
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
+        .file-info {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .file-actions {
+            margin-left: 10px;
+        }
+
+        .btn-delete-file {
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-delete-file:hover {
+            background: #cc0000;
+        }
+
+        .delete-all-files-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+
+        .btn-delete-all {
+            background: #ff6666;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-delete-all:hover {
+            background: #cc3333;
+        }
+
         /* Username Styling */
         #userName {
             color: #667eea;
@@ -474,7 +522,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🤖 Mini-RAG</h1>
+            <h1>🤖 RAG</h1>
             <p>AI-Powered Question Answering System</p>
         </div>
         
@@ -1265,12 +1313,19 @@
                     details.assets.forEach(asset => {
                         const fileSize = formatFileSize(asset.asset_size);
                         filesList += `
-                            <div class="file-item" data-asset-id="${asset.asset_id}" onclick="displayFileContent(${asset.asset_id})">
-                                📄 ${asset.asset_name} (${fileSize})
+                            <div class="file-item" data-asset-id="${asset.asset_id}">
+                                <div class="file-info" onclick="displayFileContent(${asset.asset_id})">
+                                    📄 ${asset.asset_name} (${fileSize})
+                                </div>
+                                <div class="file-actions">
+                                    <button class="btn-delete-file" onclick="deleteFile(${asset.asset_id}, '${asset.asset_name}')" title="Delete file">
+                                        🗑️
+                                    </button>
+                                </div>
                             </div>
                         `;
                     });
-                    filesList += '</div></div>';
+                    filesList += '</div>';
                 }
                 
                 contentElement.innerHTML = `
@@ -1294,6 +1349,18 @@
                         item.style.border = '1px solid #ddd';
                         item.style.borderRadius = '4px';
                         item.style.transition = 'background-color 0.2s';
+                        
+                        // Add click handler to file info (not the delete button)
+                        const fileInfo = item.querySelector('.file-info');
+                        if (fileInfo) {
+                            fileInfo.addEventListener('click', function(e) {
+                                e.stopPropagation();
+                                const assetId = item.getAttribute('data-asset-id');
+                                if (assetId) {
+                                    displayFileContent(assetId);
+                                }
+                            });
+                        }
                         
                         item.addEventListener('mouseenter', function() {
                             this.style.backgroundColor = '#e6f3ff';
@@ -1441,6 +1508,75 @@
                 });
             }
         }
+
+        // Delete Functions
+        async function deleteFile(assetId, fileName) {
+            const projectSelect = document.getElementById('projectSelect');
+            const selectedProject = projectSelect.value;
+            
+            if (!selectedProject) {
+                showAppStatus('Please select a project first', 'error');
+                return;
+            }
+
+            if (!assetId) {
+                showAppStatus('No file selected', 'error');
+                return;
+            }
+
+            // Confirm deletion
+            if (!confirm(`Are you sure you want to delete "${fileName}"? This action cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                showAppStatus('Deleting file...', 'info');
+                
+                const response = await fetch(`/api/v1/data/file/${selectedProject}/${assetId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.signal === 'FILE_DELETED') {
+                    showAppStatus(`File "${fileName}" deleted successfully`, 'success');
+                    
+                    // Refresh project details to update the file list
+                    setTimeout(() => {
+                        showProjectStatus(selectedProject, 'projectStatusContent');
+                    }, 1000);
+                } else {
+                    // Handle error response - check for nested error structure
+                    let errorMessage = 'Unknown error';
+                    
+                    // Check for different error response structures
+                    if (data.error) {
+                        if (typeof data.error === 'object' && data.error.message) {
+                            errorMessage = data.error.message;
+                        } else if (typeof data.error === 'string') {
+                            errorMessage = data.error;
+                        } else {
+                            errorMessage = JSON.stringify(data.error);
+                        }
+                    } else if (data.message) {
+                        errorMessage = data.message;
+                    } else if (data.signal) {
+                        errorMessage = `Error: ${data.signal}`;
+                    } else {
+                        errorMessage = 'An unexpected error occurred';
+                    }
+                    
+                    showAppStatus('Failed to delete file: ' + errorMessage, 'error');
+                }
+            } catch (error) {
+                console.error('Delete file error:', error);
+                showAppStatus('Failed to delete file: ' + (error.message || 'Network error'), 'error');
+            }
+        }
     </script>
 </body>
-</html> 
+</html>

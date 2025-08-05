@@ -298,12 +298,13 @@ async def process_endpoint(request: Request, project_code: int, process_request:
     """
     
     # Validate input parameters
-    chunk_size = process_request.chunk_size or 100
-    overlap_size = process_request.overlap_size or 20
+    chunk_size = process_request.chunk_size or 1000
+    overlap_size = process_request.overlap_size or 200
     do_reset = process_request.do_reset or 0
+    chunking_method = process_request.chunking_method or "semantic"
     
     # Log processing request for debugging
-    logger.info(f"Processing request for project {project_code}: chunk_size={chunk_size}, overlap_size={overlap_size}, do_reset={do_reset}, file_id={process_request.file_id}")
+    logger.info(f"Processing request for project {project_code}: chunk_size={chunk_size}, overlap_size={overlap_size}, do_reset={do_reset}, chunking_method={chunking_method}, file_id={process_request.file_id}")
 
     project_model = await ProjectModel.create_instance(
         db_client=request.app.db_client
@@ -421,7 +422,8 @@ async def process_endpoint(request: Request, project_code: int, process_request:
                 file_content=file_content,
                 file_id=file_name,
                 chunk_size=chunk_size,
-                overlap_size=overlap_size
+                overlap_size=overlap_size,
+                chunking_method=chunking_method
             )
 
             if not file_chunks or len(file_chunks) == 0:
@@ -682,7 +684,8 @@ async def delete_project(request: Request, project_code: int,
                        current_user: User = Depends(get_current_active_user)):
     """
     Delete a project and all its associated data.
-    This will remove the project, its assets, chunks, and vector data.
+    This will remove the project, all its files, chunks, and vector data.
+    Note: This is equivalent to deleting all files in the project plus the project itself.
     """
     try:
         project_model = await ProjectModel.create_instance(
@@ -747,10 +750,42 @@ async def delete_project(request: Request, project_code: int,
         
         # Delete project from database (this will cascade to assets and chunks)
         try:
-            await project_model.delete_project(project_id=project.project_id)
-            logger.info(f"Deleted project {project.project_id} (code: {project_code}) for user {current_user.user_id}")
+            logger.info(f"Starting deletion process for project {project.project_id} (code: {project_code})")
+            
+            # First, delete all chunks for this project
+            logger.info(f"Deleting chunks for project {project.project_id}")
+            try:
+                deleted_chunks = await chunk_model.delete_chunks_by_project_id(project_id=project.project_id)
+                logger.info(f"Deleted {deleted_chunks} chunks for project {project.project_id}")
+            except Exception as e:
+                logger.warning(f"Could not delete chunks for project {project.project_id}: {e}")
+            
+            # Then, delete all assets for this project
+            logger.info(f"Deleting assets for project {project.project_id}")
+            try:
+                deleted_assets = await asset_model.delete_all_project_assets(project_id=project.project_id)
+                logger.info(f"Deleted {deleted_assets} assets for project {project.project_id}")
+            except Exception as e:
+                logger.warning(f"Could not delete assets for project {project.project_id}: {e}")
+            
+            # Finally, delete the project
+            logger.info(f"Deleting project {project.project_id}")
+            success = await project_model.delete_project(project_id=project.project_id)
+            
+            if not success:
+                logger.warning(f"Project {project.project_id} not found or already deleted")
+                return JSONResponse(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    content={
+                        "signal": "PROJECT_NOT_FOUND",
+                        "error": "Project not found",
+                        "message": f"Project {project_code} not found or already deleted"
+                    }
+                )
+            
+            logger.info(f"Successfully deleted project {project.project_id} (code: {project_code}) for user {current_user.user_id}")
         except Exception as e:
-            logger.error(f"Error deleting project {project.project_id}: {e}")
+            logger.error(f"Error deleting project {project.project_id}: {e}", exc_info=True)
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content={
@@ -777,3 +812,135 @@ async def delete_project(request: Request, project_code: int,
         
     except Exception as e:
         logger.error(f"Error deleting project {project_code} for user {current_user.user_id}: {e}")
+        return ErrorHandler.handle_exception(e, context="delete_project", user_id=current_user.user_id)
+
+@data_router.delete("/file/{project_code}/{asset_id}")
+async def delete_file(request: Request, project_code: int, asset_id: int,
+                     current_user: User = Depends(get_current_active_user)):
+    """
+    Delete a single file from a project.
+    This will remove the file, its chunks, and associated vector data.
+    """
+    try:
+        project_model = await ProjectModel.create_instance(
+            db_client=request.app.db_client
+        )
+        
+        # Get project with user access validation
+        project = await project_model.get_user_project(
+            project_code=project_code,
+            user_id=current_user.user_id
+        )
+        
+        if not project:
+            return handle_project_error("ACCESS_DENIED", {
+                "project_code": project_code,
+                "user_id": current_user.user_id,
+                "message": "Project not found or access denied"
+            })
+        
+        # Get asset details
+        asset_model = await AssetModel.create_instance(
+            db_client=request.app.db_client
+        )
+        
+        asset = await asset_model.get_asset_by_id(
+            asset_id=asset_id,
+            asset_project_id=project.project_id
+        )
+        
+        if not asset:
+            return handle_file_error("NOT_FOUND", {
+                "file_id": asset_id,
+                "project_id": project_code,
+                "message": f"File with ID {asset_id} not found in project {project_code}",
+                "suggestion": "Check if the file exists and you have access to it"
+            })
+        
+        # Get chunks for this asset
+        chunk_model = await ChunkModel.create_instance(
+            db_client=request.app.db_client
+        )
+        
+        chunks = await chunk_model.get_chunks_by_asset_id(asset_id=asset_id)
+        chunk_count = len(chunks) if chunks else 0
+        
+        # Delete vectors from Qdrant
+        try:
+            nlp_controller = NLPController(
+                vectordb_client=request.app.vectordb_client,
+                generation_client=request.app.generation_client,
+                embedding_client=request.app.embedding_client,
+                template_parser=request.app.template_parser,
+            )
+            
+            # Delete vectors by asset_id
+            await nlp_controller.delete_vectors_by_asset_id(project=project, asset_id=asset_id)
+            logger.info(f"Deleted vectors for asset {asset_id} from vector database")
+            
+        except Exception as e:
+            logger.warning(f"Could not delete vectors for asset {asset_id}: {e}")
+        
+        # Delete chunks for this asset
+        try:
+            deleted_chunks = await chunk_model.delete_chunks_by_asset_id(asset_id=asset_id)
+            logger.info(f"Deleted {deleted_chunks} chunks for asset {asset_id}")
+        except Exception as e:
+            logger.error(f"Error deleting chunks for asset {asset_id}: {e}")
+            return JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content={
+                    "signal": "CHUNK_DELETION_FAILED",
+                    "error": "Failed to delete file chunks",
+                    "message": "An error occurred while deleting file chunks. Please try again."
+                }
+            )
+        
+        # Delete the asset
+        try:
+            deleted_assets = await asset_model.delete_asset(
+                asset_id=asset_id,
+                asset_project_id=project.project_id
+            )
+            
+            if deleted_assets == 0:
+                return JSONResponse(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    content={
+                        "signal": "FILE_NOT_FOUND",
+                        "error": "File not found",
+                        "message": f"File with ID {asset_id} not found in project {project_code}"
+                    }
+                )
+            
+            logger.info(f"Deleted asset {asset_id} from project {project.project_id}")
+            
+        except Exception as e:
+            logger.error(f"Error deleting asset {asset_id}: {e}")
+            return JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content={
+                    "signal": "FILE_DELETION_FAILED",
+                    "error": "Failed to delete file",
+                    "message": "An error occurred while deleting the file. Please try again."
+                }
+            )
+        
+        return JSONResponse(
+            content={
+                "signal": "FILE_DELETED",
+                "message": f"File '{asset.asset_name}' deleted successfully",
+                "deleted_file": {
+                    "asset_id": asset.asset_id,
+                    "asset_name": asset.asset_name,
+                    "asset_size": asset.asset_size,
+                    "asset_type": asset.asset_type,
+                    "chunk_count": chunk_count,
+                    "deleted_at": asset.updated_at.isoformat() if asset.updated_at else None
+                }
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"Error deleting file {asset_id} from project {project_code} for user {current_user.user_id}: {e}")
+        return ErrorHandler.handle_exception(e, context="delete_file", user_id=current_user.user_id)

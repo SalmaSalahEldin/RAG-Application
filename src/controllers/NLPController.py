@@ -153,3 +153,69 @@ class NLPController(BaseController):
 
         return answer, full_prompt, chat_history
 
+    async def delete_vectors_by_asset_id(self, project: Project, asset_id: int) -> bool:
+        """
+        Delete all vectors associated with a specific asset.
+        
+        Args:
+            project: Project object
+            asset_id: Asset ID to delete vectors for
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            collection_name = self.create_collection_name(project_id=project.project_id)
+            
+            # Delete vectors by filter (asset_id)
+            filter_condition = {"asset_id": asset_id}
+            success = await self.vectordb_client.delete_vectors_by_filter(
+                collection_name=collection_name,
+                filter_condition=filter_condition
+            )
+            
+            if success:
+                print(f"Successfully deleted vectors for asset {asset_id} from collection {collection_name}")
+            else:
+                print(f"Failed to delete vectors for asset {asset_id} from collection {collection_name}")
+            
+            return success
+            
+        except Exception as e:
+            print(f"Error deleting vectors for asset {asset_id}: {e}")
+            return False
+
+    async def delete_vectors_by_chunk_ids(self, project: Project, chunk_ids: List[int]) -> bool:
+        """
+        Delete specific vectors by chunk IDs.
+        
+        Args:
+            project: Project object
+            chunk_ids: List of chunk IDs to delete vectors for
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            collection_name = self.create_collection_name(project_id=project.project_id)
+            
+            # Convert chunk IDs to strings for vector deletion
+            vector_ids = [str(chunk_id) for chunk_id in chunk_ids]
+            
+            # Delete vectors by IDs
+            success = await self.vectordb_client.delete_vectors_by_ids(
+                collection_name=collection_name,
+                vector_ids=vector_ids
+            )
+            
+            if success:
+                print(f"Successfully deleted {len(chunk_ids)} vectors from collection {collection_name}")
+            else:
+                print(f"Failed to delete vectors from collection {collection_name}")
+            
+            return success
+            
+        except Exception as e:
+            print(f"Error deleting vectors for chunk IDs {chunk_ids}: {e}")
+            return False
+

@@ -7,7 +7,7 @@ from models.db_schemes import RetrievedDocument
 
 class QdrantDBProvider(VectorDBInterface):
 
-    def __init__(self, db_client: str, default_vector_size: int = 786,
+    def __init__(self, db_client: str, default_vector_size: int = 3072,
                                      distance_method: str = None, index_threshold: int=100):
 
         self.client = None
@@ -27,35 +27,35 @@ class QdrantDBProvider(VectorDBInterface):
             # Check if we have a path (local storage) or should try server
             if self.db_client and not self.db_client.startswith("http"):
                 # Use local storage directly
-                self.logger.info("📝 Using Qdrant local storage...")
+                self.logger.info("Using Qdrant local storage...")
                 self.client = QdrantClient(path=self.db_client)
                 # Test the connection by listing collections
                 self.client.get_collections()
-                self.logger.info(f"✅ Successfully connected to Qdrant local storage at: {self.db_client}")
+                self.logger.info(f"Successfully connected to Qdrant local storage at: {self.db_client}")
             else:
                 # Try to connect to Qdrant server first
                 self.client = QdrantClient(host="localhost", port=6333)
                 # Test the connection by listing collections
                 self.client.get_collections()
-                self.logger.info("✅ Successfully connected to Qdrant server on localhost:6333")
+                self.logger.info("Successfully connected to Qdrant server on localhost:6333")
         except Exception as e:
-            self.logger.warning(f"⚠️  Could not connect to Qdrant server: {e}")
-            self.logger.info("📝 Falling back to local storage...")
+            self.logger.warning(f"Could not connect to Qdrant server: {e}")
+            self.logger.info("Falling back to local storage...")
             
             try:
                 self.client = QdrantClient(path=self.db_client)
                 # Test the connection by listing collections
                 self.client.get_collections()
-                self.logger.info(f"✅ Successfully connected to Qdrant local storage at: {self.db_client}")
+                self.logger.info(f"Successfully connected to Qdrant local storage at: {self.db_client}")
             except Exception as local_e:
                 if "already accessed by another instance" in str(local_e):
-                    self.logger.warning(f"⚠️  Qdrant local instance already running at: {self.db_client}")
-                    self.logger.info("📝 Attempting to use existing local instance...")
+                    self.logger.warning(f"Qdrant local instance already running at: {self.db_client}")
+                    self.logger.info("Attempting to use existing local instance...")
                     # Try one more time - sometimes it works despite the warning
                     self.client = QdrantClient(path=self.db_client)
                 else:
-                    self.logger.error(f"❌ Failed to connect to Qdrant: {local_e}")
-                    self.logger.error("💡 To use Qdrant server, run: docker run -p 6333:6333 qdrant/qdrant")
+                    self.logger.error(f"Failed to connect to Qdrant: {local_e}")
+                    self.logger.error("To use Qdrant server, run: docker run -p 6333:6333 qdrant/qdrant")
                     raise local_e
 
     async def disconnect(self):
@@ -182,4 +182,137 @@ class QdrantDBProvider(VectorDBInterface):
             })
             for result in results
         ]
+
+    async def delete_vectors_by_ids(self, collection_name: str, vector_ids: List[str]) -> bool:
+        """
+        Delete specific vectors by their IDs.
+        
+        Args:
+            collection_name: Name of the collection
+            vector_ids: List of vector IDs to delete
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            if not await self.is_collection_existed(collection_name):
+                self.logger.warning(f"Collection {collection_name} does not exist")
+                return False
+            
+            # Convert string IDs to integers if needed
+            ids_to_delete = []
+            for vid in vector_ids:
+                try:
+                    if isinstance(vid, str):
+                        ids_to_delete.append(int(vid))
+                    else:
+                        ids_to_delete.append(vid)
+                except (ValueError, TypeError):
+                    self.logger.warning(f"Invalid vector ID format: {vid}")
+                    continue
+            
+            if not ids_to_delete:
+                self.logger.warning("No valid vector IDs provided for deletion")
+                return False
+            
+            # Delete vectors by IDs
+            self.client.delete(
+                collection_name=collection_name,
+                points_selector=models.PointIdsList(
+                    points=ids_to_delete
+                )
+            )
+            
+            self.logger.info(f"Successfully deleted {len(ids_to_delete)} vectors from collection {collection_name}")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Error deleting vectors by IDs from collection {collection_name}: {e}")
+            return False
+
+    async def delete_vectors_by_filter(self, collection_name: str, filter_condition: dict) -> bool:
+        """
+        Delete vectors that match a filter condition.
+        
+        Args:
+            collection_name: Name of the collection
+            filter_condition: Filter condition to match vectors for deletion
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            if not await self.is_collection_existed(collection_name):
+                self.logger.warning(f"Collection {collection_name} does not exist")
+                return False
+            
+            # Convert filter condition to Qdrant filter format
+            qdrant_filter = self._convert_filter_to_qdrant(filter_condition)
+            
+            if not qdrant_filter:
+                self.logger.warning("Invalid filter condition provided")
+                return False
+            
+            # Delete vectors by filter
+            self.client.delete(
+                collection_name=collection_name,
+                points_selector=models.FilterSelector(
+                    filter=qdrant_filter
+                )
+            )
+            
+            self.logger.info(f"Successfully deleted vectors matching filter from collection {collection_name}")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Error deleting vectors by filter from collection {collection_name}: {e}")
+            return False
+
+    def _convert_filter_to_qdrant(self, filter_condition: dict):
+        """
+        Convert a filter condition to Qdrant filter format.
+        
+        Args:
+            filter_condition: Dictionary containing filter conditions
+            
+        Returns:
+            Qdrant filter object or None if invalid
+        """
+        try:
+            conditions = []
+            
+            for key, value in filter_condition.items():
+                if key == "asset_id":
+                    conditions.append(
+                        models.FieldCondition(
+                            key="metadata.asset_id",
+                            match=models.MatchValue(value=value)
+                        )
+                    )
+                elif key == "project_id":
+                    conditions.append(
+                        models.FieldCondition(
+                            key="metadata.project_id",
+                            match=models.MatchValue(value=value)
+                        )
+                    )
+                elif key == "chunk_id":
+                    conditions.append(
+                        models.FieldCondition(
+                            key="metadata.chunk_id",
+                            match=models.MatchValue(value=value)
+                        )
+                    )
+                # Add more filter conditions as needed
+            
+            if conditions:
+                return models.Filter(
+                    must=conditions
+                )
+            else:
+                return None
+                
+        except Exception as e:
+            self.logger.error(f"Error converting filter to Qdrant format: {e}")
+            return None
 

@@ -9,7 +9,7 @@ import json
 
 class PGVectorProvider(VectorDBInterface):
 
-    def __init__(self, db_client, default_vector_size: int = 786,
+    def __init__(self, db_client, default_vector_size: int = 3072,
                        distance_method: str = None, index_threshold: int=100):
         
         self.db_client = db_client
@@ -268,29 +268,152 @@ class PGVectorProvider(VectorDBInterface):
         return True
     
     async def search_by_vector(self, collection_name: str, vector: list, limit: int):
-
-        is_collection_existed = await self.is_collection_existed(collection_name=collection_name)
-        if not is_collection_existed:
-            self.logger.error(f"Can not search for records in a non-existed collection: {collection_name}")
-            return False
-        
-        vector = "[" + ",".join([ str(v) for v in vector ]) + "]"
         async with self.db_client() as session:
             async with session.begin():
-                search_sql = sql_text(f'SELECT {PgVectorTableSchemeEnums.TEXT.value} as text, 1 - ({PgVectorTableSchemeEnums.VECTOR.value} <=> :vector) as score'
-                                      f' FROM {collection_name}'
-                                      ' ORDER BY score DESC '
-                                      f'LIMIT {limit}'
-                                      )
                 
-                result = await session.execute(search_sql, {"vector": vector})
-
-                records = result.fetchall()
-
+                # Convert vector to PostgreSQL array format
+                vector_str = "[" + ",".join(map(str, vector)) + "]"
+                
+                # Build the distance function based on the distance method
+                if self.distance_method == PgVectorDistanceMethodEnums.COSINE.value:
+                    distance_func = "1 - (embedding <=> :vector)"
+                elif self.distance_method == PgVectorDistanceMethodEnums.DOT.value:
+                    distance_func = "embedding <#> :vector"
+                else:
+                    distance_func = "1 - (embedding <=> :vector)"  # Default to cosine
+                
+                search_sql = sql_text(f'''
+                    SELECT id, text, metadata, {distance_func} as distance
+                    FROM {collection_name}
+                    ORDER BY embedding <=> :vector
+                    LIMIT :limit
+                ''')
+                
+                results = await session.execute(search_sql, {
+                    "vector": vector_str,
+                    "limit": limit
+                })
+                
+                records = results.fetchall()
+                
+                if not records:
+                    return None
+                
                 return [
                     RetrievedDocument(
-                        text=record.text,
-                        score=record.score
+                        text=record[1],
+                        score=float(record[3])
                     )
                     for record in records
                 ]
+
+    async def delete_vectors_by_ids(self, collection_name: str, vector_ids: List[str]) -> bool:
+        """
+        Delete specific vectors by their IDs.
+        
+        Args:
+            collection_name: Name of the collection
+            vector_ids: List of vector IDs to delete
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            if not await self.is_collection_existed(collection_name):
+                self.logger.warning(f"Collection {collection_name} does not exist")
+                return False
+            
+            # Convert string IDs to integers if needed
+            ids_to_delete = []
+            for vid in vector_ids:
+                try:
+                    if isinstance(vid, str):
+                        ids_to_delete.append(int(vid))
+                    else:
+                        ids_to_delete.append(vid)
+                except (ValueError, TypeError):
+                    self.logger.warning(f"Invalid vector ID format: {vid}")
+                    continue
+            
+            if not ids_to_delete:
+                self.logger.warning("No valid vector IDs provided for deletion")
+                return False
+            
+            # Delete vectors by IDs
+            async with self.db_client() as session:
+                async with session.begin():
+                    # Convert IDs list to PostgreSQL array format
+                    ids_str = "[" + ",".join(map(str, ids_to_delete)) + "]"
+                    
+                    delete_sql = sql_text(f'''
+                        DELETE FROM {collection_name}
+                        WHERE id = ANY(:ids)
+                    ''')
+                    
+                    result = await session.execute(delete_sql, {"ids": ids_str})
+                    await session.commit()
+                    
+                    deleted_count = result.rowcount
+                    self.logger.info(f"Successfully deleted {deleted_count} vectors from collection {collection_name}")
+                    return True
+                    
+        except Exception as e:
+            self.logger.error(f"Error deleting vectors by IDs from collection {collection_name}: {e}")
+            return False
+
+    async def delete_vectors_by_filter(self, collection_name: str, filter_condition: dict) -> bool:
+        """
+        Delete vectors that match a filter condition.
+        
+        Args:
+            collection_name: Name of the collection
+            filter_condition: Filter condition to match vectors for deletion
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            if not await self.is_collection_existed(collection_name):
+                self.logger.warning(f"Collection {collection_name} does not exist")
+                return False
+            
+            # Build WHERE clause based on filter conditions
+            where_conditions = []
+            params = {}
+            
+            for key, value in filter_condition.items():
+                if key == "asset_id":
+                    where_conditions.append("metadata->>'asset_id' = :asset_id")
+                    params["asset_id"] = str(value)
+                elif key == "project_id":
+                    where_conditions.append("metadata->>'project_id' = :project_id")
+                    params["project_id"] = str(value)
+                elif key == "chunk_id":
+                    where_conditions.append("metadata->>'chunk_id' = :chunk_id")
+                    params["chunk_id"] = str(value)
+                # Add more filter conditions as needed
+            
+            if not where_conditions:
+                self.logger.warning("No valid filter conditions provided")
+                return False
+            
+            # Build the DELETE query
+            where_clause = " AND ".join(where_conditions)
+            delete_sql = sql_text(f'''
+                DELETE FROM {collection_name}
+                WHERE {where_clause}
+            ''')
+            
+            # Execute deletion
+            async with self.db_client() as session:
+                async with session.begin():
+                    result = await session.execute(delete_sql, params)
+                    await session.commit()
+                    
+                    deleted_count = result.rowcount
+                    self.logger.info(f"Successfully deleted {deleted_count} vectors matching filter from collection {collection_name}")
+                    return True
+                    
+        except Exception as e:
+            self.logger.error(f"Error deleting vectors by filter from collection {collection_name}: {e}")
+            return False

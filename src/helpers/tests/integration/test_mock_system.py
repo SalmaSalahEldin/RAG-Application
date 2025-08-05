@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-Test script for Mini-RAG with mock database.
-This demonstrates the system working perfectly for assignment submission.
+Test script for RAG with mock database.
 """
 
 import requests
@@ -9,14 +8,13 @@ import json
 import time
 
 def test_mock_system():
-    """Test the Mini-RAG system with mock database."""
-    base_url = "http://localhost:8000"
+    """Test the RAG system with mock database."""
     
-    print("🎉 Mini-RAG System Test (Mock Database)")
-    print("=" * 60)
+    print("RAG System Test (Mock Database)")
+    print("=" * 50)
     print("📝 This test demonstrates the system working with mock database")
     print("📝 Perfect for assignment submission and demonstration")
-    print("=" * 60)
+    print("=" * 50)
     
     # Test 1: Server is running
     print("\n1. ✅ Server Status")
@@ -109,9 +107,9 @@ def test_mock_system():
         except Exception as e:
             print(f"   ❌ {endpoint} - Error: {e}")
     
-    print("\n" + "=" * 60)
+    print("\n" + "=" * 50)
     print("🎉 SYSTEM STATUS: FULLY OPERATIONAL")
-    print("=" * 60)
+    print("=" * 50)
     
     print("\n📋 Assignment Requirements - ALL MET:")
     print("✅ Authentication - User model with email & password")
@@ -161,7 +159,7 @@ def test_mock_system():
     print("3. Configure OpenAI API keys in .env file")
     print("4. Restart server for full functionality")
     
-    print("\n🎉 CONGRATULATIONS! Your Mini-RAG system is complete!")
+    print("\nCONGRATULATIONS! Your RAG system is complete!")
     return True
 
 if __name__ == "__main__":

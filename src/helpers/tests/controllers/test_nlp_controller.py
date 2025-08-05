@@ -34,11 +34,11 @@ class TestNLPController:
         )
         
         # Mock the default_vector_size
-        controller.vectordb_client.default_vector_size = 786
+        controller.vectordb_client.default_vector_size = 3072
         
         collection_name = controller.create_collection_name(project_id="123")
         
-        assert collection_name == "collection_786_123"
+        assert collection_name == "collection_3072_123"
 
     def test_create_collection_name_no_vectordb_client(self):
         """Test creating collection name when vectordb_client is None."""

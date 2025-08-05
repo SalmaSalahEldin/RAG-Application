@@ -1,5 +1,7 @@
 """
-Pytest configuration and fixtures for Mini-RAG testing suite.
+Pytest configuration and fixtures for RAG testing suite.
+
+This module provides common fixtures and configuration for all tests in the RAG project.
 """
 
 import pytest

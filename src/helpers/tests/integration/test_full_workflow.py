@@ -1,16 +1,13 @@
 """
-Integration tests for the full Mini-RAG workflow.
+Integration tests for the full RAG workflow.
 """
 
 import pytest
-from unittest.mock import AsyncMock, Mock, patch
-from fastapi.testclient import TestClient
-from fastapi import status
-import io
+import requests
 import json
 
 class TestFullWorkflow:
-    """Integration tests for the complete Mini-RAG workflow."""
+    """Integration tests for the complete RAG workflow."""
 
     def test_complete_user_workflow(self, test_client):
         """Test complete user workflow: register, login, create project, upload, process, query."""

@@ -100,7 +100,7 @@ def test_api_key_configuration():
         print("✅ LLM Providers: READY")
         print("✅ Vector Database: READY")
         print("✅ All Components: READY")
-        print("\n🚀 Your Mini-RAG system is ready for full NLP features!")
+        print("\nYour RAG system is ready for full NLP features!")
         print("📝 Restart your server to enable all features.")
         return True
     else:

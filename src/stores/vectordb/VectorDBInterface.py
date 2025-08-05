@@ -50,3 +50,31 @@ class VectorDBInterface(ABC):
     def search_by_vector(self, collection_name: str, vector: list, limit: int) -> List[RetrievedDocument]:
         pass
     
+    @abstractmethod
+    def delete_vectors_by_ids(self, collection_name: str, vector_ids: List[str]) -> bool:
+        """
+        Delete specific vectors by their IDs.
+        
+        Args:
+            collection_name: Name of the collection
+            vector_ids: List of vector IDs to delete
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        pass
+    
+    @abstractmethod
+    def delete_vectors_by_filter(self, collection_name: str, filter_condition: dict) -> bool:
+        """
+        Delete vectors that match a filter condition.
+        
+        Args:
+            collection_name: Name of the collection
+            filter_condition: Filter condition to match vectors for deletion
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        pass
+    

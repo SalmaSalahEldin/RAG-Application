@@ -33,64 +33,64 @@ async def startup_span():
         database.db_client = app.db_client
 
         # Initialize LLM clients only if API keys are available
-        print(f"🔧 Checking OpenAI API key: {settings.OPENAI_API_KEY[:20] if settings.OPENAI_API_KEY else 'NOT SET'}...")
+        print(f"Checking OpenAI API key: {settings.OPENAI_API_KEY[:20] if settings.OPENAI_API_KEY else 'NOT SET'}...")
         
         if settings.OPENAI_API_KEY and settings.OPENAI_API_KEY != "your-openai-api-key-here":
-            print("✅ OpenAI API key found - LLM features enabled")
+            print("OpenAI API key found - LLM features enabled")
             llm_provider_factory = LLMProviderFactory(settings)
             vectordb_provider_factory = VectorDBProviderFactory(config=settings, db_client=app.db_client)
 
             # generation client
-            print(f"🔧 Creating generation client for provider: {settings.GENERATION_BACKEND}")
+            print(f"Creating generation client for provider: {settings.GENERATION_BACKEND}")
             app.generation_client = llm_provider_factory.create(provider=settings.GENERATION_BACKEND)
             if app.generation_client:
                 app.generation_client.set_generation_model(model_id = settings.GENERATION_MODEL_ID)
-                print("✅ Generation client initialized")
+                print("Generation client initialized")
             else:
-                print("❌ Failed to create generation client")
+                print("Failed to create generation client")
 
             # embedding client
-            print(f"🔧 Creating embedding client for provider: {settings.EMBEDDING_BACKEND}")
+            print(f"Creating embedding client for provider: {settings.EMBEDDING_BACKEND}")
             app.embedding_client = llm_provider_factory.create(provider=settings.EMBEDDING_BACKEND)
             if app.embedding_client:
                 app.embedding_client.set_embedding_model(model_id=settings.EMBEDDING_MODEL_ID,
                                                      embedding_size=settings.EMBEDDING_MODEL_SIZE)
-                print("✅ Embedding client initialized")
+                print("Embedding client initialized")
             else:
-                print("❌ Failed to create embedding client")
+                print("Failed to create embedding client")
             
             # vector db client
-            print(f"🔧 Creating vector database client for provider: {settings.VECTOR_DB_BACKEND}")
+            print(f"Creating vector database client for provider: {settings.VECTOR_DB_BACKEND}")
             app.vectordb_client = vectordb_provider_factory.create(
                 provider=settings.VECTOR_DB_BACKEND
             )
             if app.vectordb_client:
-                print("✅ Vector database client created, attempting to connect...")
+                print("Vector database client created, attempting to connect...")
                 try:
                     await app.vectordb_client.connect()
-                    print("✅ Vector database client initialized")
+                    print("Vector database client initialized")
                 except Exception as e:
-                    print(f"❌ Vector database connection failed: {e}")
+                    print(f"Vector database connection failed: {e}")
                     app.vectordb_client = None
             else:
-                print("❌ Failed to create vector database client")
+                print("Failed to create vector database client")
 
             app.template_parser = TemplateParser(
                 language=settings.PRIMARY_LANG,
                 default_language=settings.DEFAULT_LANG,
             )
-            print("✅ Template parser initialized")
+            print("Template parser initialized")
         else:
             # Set mock clients for testing without API keys
             app.generation_client = None
             app.embedding_client = None
             app.vectordb_client = None
             app.template_parser = None
-            print("⚠️  Warning: No OpenAI API key provided. LLM features will be disabled.")
+            print("Warning: No OpenAI API key provided. LLM features will be disabled.")
             
     except Exception as e:
-        print(f"⚠️  Warning: Database connection failed: {e}")
-        print("📝 Using mock database for testing...")
+        print(f"Warning: Database connection failed: {e}")
+        print("Using mock database for testing...")
         
         # Set mock clients
         app.generation_client = None

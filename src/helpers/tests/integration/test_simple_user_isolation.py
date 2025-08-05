@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Simple test script to verify user isolation in Mini-RAG with mock database
+Simple test script to verify user isolation in RAG with mock database
 """
 
 import requests
@@ -14,7 +14,7 @@ API_BASE = f"{BASE_URL}/api/v1"
 def test_basic_user_isolation():
     """Test basic user isolation functionality"""
     
-    print("🧪 Testing Basic User Isolation in Mini-RAG")
+    print("Testing Basic User Isolation in RAG")
     print("=" * 50)
     
     # Test data

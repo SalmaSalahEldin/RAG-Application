@@ -159,12 +159,23 @@ class ProjectModel(BaseDataModel):
         """
         async with self.db_client() as session:
             async with session.begin():
-                query = select(Project).where(Project.project_id == project_id)
-                project = (await session.execute(query)).scalar_one_or_none()
-                
-                if project:
+                try:
+                    # First, get the project
+                    query = select(Project).where(Project.project_id == project_id)
+                    result = await session.execute(query)
+                    project = result.scalar_one_or_none()
+                    
+                    if not project:
+                        return False
+                    
+                    # Delete the project (cascade should handle related data)
                     await session.delete(project)
-                    await session.commit()
+                    # The session.begin() context manager will handle the commit
                     return True
-                else:
-                    return False
+                    
+                except Exception as e:
+                    # Log the error and re-raise
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.error(f"Error deleting project {project_id}: {e}", exc_info=True)
+                    raise

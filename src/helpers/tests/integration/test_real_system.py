@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-Test script for Mini-RAG with real database.
-This demonstrates the system working with full functionality.
+Test script for RAG with real database.
 """
 
 import requests
@@ -9,14 +8,14 @@ import json
 import time
 
 def test_real_system():
-    """Test the Mini-RAG system with real database."""
-    base_url = "http://localhost:5000"
+    """Test the RAG system with real database."""
     
-    print("🎉 Mini-RAG System Test (Real Database)")
-    print("=" * 60)
-    print("📝 This test demonstrates the system working with real database")
-    print("📝 Full functionality with authentication and data persistence")
-    print("=" * 60)
+    print("RAG System Test (Real Database)")
+    print("=" * 50)
+    
+    print("This test demonstrates the system working with real database")
+    print("Full functionality with authentication and data persistence")
+    print("=" * 50)
     
     # Test 1: Server is running
     print("\n1. ✅ Server Status")
@@ -126,9 +125,9 @@ def test_real_system():
         except Exception as e:
             print(f"   ❌ {endpoint} - Error: {e}")
     
-    print("\n" + "=" * 60)
+    print("\n" + "=" * 50)
     print("🎉 SYSTEM STATUS: FULLY OPERATIONAL")
-    print("=" * 60)
+    print("=" * 50)
     
     print("\n📋 Assignment Requirements - ALL MET:")
     print("✅ Authentication - User model with email & password")
@@ -181,7 +180,7 @@ def test_real_system():
     print("✅ Multi-user support")
     print("✅ Production-ready setup")
     
-    print("\n🎉 CONGRATULATIONS! Your Mini-RAG system is complete!")
+    print("\nCONGRATULATIONS! Your RAG system is complete!")
     return True
 
 if __name__ == "__main__":

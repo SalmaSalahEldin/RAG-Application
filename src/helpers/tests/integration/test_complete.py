@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
 """
-Comprehensive test script for the Mini-RAG authentication system.
+Comprehensive test script for the RAG authentication system.
 """
 
 import requests
 import json
 import time
 
-def test_server():
-    """Test all server endpoints."""
-    base_url = "http://localhost:8000"
+def test_authentication_system():
+    """Test the complete authentication system."""
     
-    print("🚀 Testing Mini-RAG Authentication System")
+    print("Testing RAG Authentication System")
     print("=" * 50)
     
     # Test 1: Basic endpoint
@@ -139,4 +138,4 @@ def test_server():
     print("4. For full functionality, set up database and API keys")
 
 if __name__ == "__main__":
-    token = test_server() 
+    token = test_authentication_system() 

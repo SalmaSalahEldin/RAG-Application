@@ -1,6 +1,7 @@
 """
-Enhanced Error Handler for Mini-RAG
-Provides detailed, representative, and convenient error messages for users.
+Enhanced Error Handler for RAG
+
+This module provides centralized error handling and user-friendly error messages.
 """
 
 from fastapi import HTTPException, status

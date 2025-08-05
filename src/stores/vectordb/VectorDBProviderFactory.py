@@ -10,14 +10,14 @@ class VectorDBProviderFactory:
         self.db_client = db_client
 
     def create(self, provider: str):
-        print(f"🔧 Creating vector database provider: {provider}")
-        print(f"🔧 Available providers: {VectorDBEnums.QDRANT.value}, {VectorDBEnums.PGVECTOR.value}")
+        print(f"Creating vector database provider: {provider}")
+        print(f"Available providers: {VectorDBEnums.QDRANT.value}, {VectorDBEnums.PGVECTOR.value}")
         
         if provider == VectorDBEnums.QDRANT.value:
-            print("🔧 Creating Qdrant provider...")
+            print("Creating Qdrant provider...")
             # Use the configured path
             qdrant_db_client = self.base_controller.get_database_path(db_name=self.config.VECTOR_DB_PATH)
-            print(f"🔧 Qdrant path: {qdrant_db_client}")
+            print(f"Qdrant path: {qdrant_db_client}")
 
             try:
                 client = QdrantDBProvider(
@@ -26,10 +26,10 @@ class VectorDBProviderFactory:
                     default_vector_size=self.config.EMBEDDING_MODEL_SIZE,
                     index_threshold=self.config.VECTOR_DB_PGVEC_INDEX_THRESHOLD,
                 )
-                print("✅ Qdrant provider created successfully")
+                print("Qdrant provider created successfully")
                 return client
             except Exception as e:
-                print(f"❌ Failed to create Qdrant provider: {e}")
+                print(f"Failed to create Qdrant provider: {e}")
                 return None
         
         if provider == VectorDBEnums.PGVECTOR.value:
