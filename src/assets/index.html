@@ -1116,19 +1116,26 @@
 
                 if (response.ok && data.signal === 'PROJECTS_RETRIEVED') {
                     if (data.projects && data.projects.length > 0) {
+                        console.log('Loaded projects:', data.projects); // Debug logging
+                        
                         data.projects.forEach(project => {
                             const statusText = project.status === 'active' ? '✅ Indexed' : '⏳ Pending';
                             const assetText = project.asset_count > 0 ? ` (${project.asset_count} files)` : '';
                             const chunkText = project.chunk_count > 0 ? ` - ${project.chunk_count} chunks` : '';
                             
+                            // Use project_code if available, otherwise fallback to project_id
+                            const projectDisplayId = project.project_code !== undefined ? project.project_code : project.project_id;
+                            
+                            console.log(`Processing project: project_id=${project.project_id}, project_code=${project.project_code}, display_id=${projectDisplayId}`); // Debug logging
+                            
                             const option = document.createElement('option');
-                            option.value = project.project_code || project.project_id; // Use project_code if available, fallback to project_id
-                            option.textContent = `Project ${project.project_code || project.project_id}${assetText}${chunkText} - ${statusText}`;
+                            option.value = projectDisplayId;
+                            option.textContent = `Project ${projectDisplayId}${assetText}${chunkText} - ${statusText}`;
                             projectSelect.appendChild(option);
                             
                             const chatOption = document.createElement('option');
-                            chatOption.value = project.project_code || project.project_id; // Use project_code if available, fallback to project_id
-                            chatOption.textContent = `Project ${project.project_code || project.project_id}${assetText}${chunkText} - ${statusText}`;
+                            chatOption.value = projectDisplayId;
+                            chatOption.textContent = `Project ${projectDisplayId}${assetText}${chunkText} - ${statusText}`;
                             chatProjectSelect.appendChild(chatOption);
                         });
                         

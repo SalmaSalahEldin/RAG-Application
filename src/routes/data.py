@@ -75,6 +75,7 @@ async def get_user_projects(request: Request, page: int = 1, page_size: int = 10
             
             project_info = {
                 "project_id": project.project_id,
+                "project_code": project.project_code,  # Add project_code to response
                 "project_uuid": str(project.project_uuid),
                 "created_at": project.created_at.isoformat() if project.created_at else None,
                 "updated_at": project.updated_at.isoformat() if project.updated_at else None,
@@ -822,6 +823,8 @@ async def delete_file(request: Request, project_code: int, asset_id: int,
     This will remove the file, its chunks, and associated vector data.
     """
     try:
+        logger.info(f"Attempting to delete file: asset_id={asset_id}, project_code={project_code}, user_id={current_user.user_id}")
+        
         project_model = await ProjectModel.create_instance(
             db_client=request.app.db_client
         )
@@ -833,11 +836,14 @@ async def delete_file(request: Request, project_code: int, asset_id: int,
         )
         
         if not project:
+            logger.warning(f"Project not found: project_code={project_code}, user_id={current_user.user_id}")
             return handle_project_error("ACCESS_DENIED", {
                 "project_code": project_code,
                 "user_id": current_user.user_id,
                 "message": "Project not found or access denied"
             })
+        
+        logger.info(f"Found project: project_id={project.project_id}, project_code={project.project_code}")
         
         # Get asset details
         asset_model = await AssetModel.create_instance(
@@ -850,12 +856,40 @@ async def delete_file(request: Request, project_code: int, asset_id: int,
         )
         
         if not asset:
-            return handle_file_error("NOT_FOUND", {
-                "file_id": asset_id,
-                "project_id": project_code,
-                "message": f"File with ID {asset_id} not found in project {project_code}",
-                "suggestion": "Check if the file exists and you have access to it"
-            })
+            logger.warning(f"Asset not found: asset_id={asset_id}, project_id={project.project_id}, project_code={project_code}")
+            
+            # Check if the asset exists at all (regardless of project)
+            async with request.app.db_client() as session:
+                from sqlalchemy import select
+                from models.db_schemes.minirag.schemes import Asset
+                stmt = select(Asset).where(Asset.asset_id == asset_id)
+                result = await session.execute(stmt)
+                asset_all = result.scalar_one_or_none()
+                
+                if asset_all:
+                    if asset_all.asset_project_id != project.project_id:
+                        return handle_file_error("ACCESS_DENIED", {
+                            "file_id": asset_id,
+                            "project_id": project_code,
+                            "message": f"File with ID {asset_id} belongs to a different project",
+                            "suggestion": "This file belongs to another project. You can only delete files from your own projects."
+                        })
+                    else:
+                        return handle_file_error("NOT_FOUND", {
+                            "file_id": asset_id,
+                            "project_id": project_code,
+                            "message": f"File with ID {asset_id} not found in project {project_code}",
+                            "suggestion": "Check if the file exists and you have access to it"
+                        })
+                else:
+                    return handle_file_error("NOT_FOUND", {
+                        "file_id": asset_id,
+                        "project_id": project_code,
+                        "message": f"File with ID {asset_id} does not exist in the system",
+                        "suggestion": "The file may have been already deleted or never existed"
+                    })
+        
+        logger.info(f"Found asset: asset_id={asset.asset_id}, asset_name={asset.asset_name}, project_id={asset.asset_project_id}")
         
         # Get chunks for this asset
         chunk_model = await ChunkModel.create_instance(
@@ -864,6 +898,8 @@ async def delete_file(request: Request, project_code: int, asset_id: int,
         
         chunks = await chunk_model.get_chunks_by_asset_id(asset_id=asset_id)
         chunk_count = len(chunks) if chunks else 0
+        
+        logger.info(f"Found {chunk_count} chunks for asset {asset_id}")
         
         # Delete vectors from Qdrant
         try:
@@ -904,6 +940,7 @@ async def delete_file(request: Request, project_code: int, asset_id: int,
             )
             
             if deleted_assets == 0:
+                logger.error(f"Failed to delete asset: asset_id={asset_id}, project_id={project.project_id}")
                 return JSONResponse(
                     status_code=status.HTTP_404_NOT_FOUND,
                     content={

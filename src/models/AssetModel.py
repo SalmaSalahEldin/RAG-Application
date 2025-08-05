@@ -75,6 +75,9 @@ class AssetModel(BaseDataModel):
         Returns:
             Asset object or None if not found
         """
+        import logging
+        logger = logging.getLogger(__name__)
+        
         async with self.db_client() as session:
             stmt = select(Asset).where(
                 Asset.asset_id == asset_id,
@@ -82,6 +85,20 @@ class AssetModel(BaseDataModel):
             )
             result = await session.execute(stmt)
             record = result.scalar_one_or_none()
+            
+            if record is None:
+                logger.warning(f"Asset not found in database: asset_id={asset_id}, asset_project_id={asset_project_id}")
+                # Let's also check if the asset exists at all (regardless of project)
+                stmt_all = select(Asset).where(Asset.asset_id == asset_id)
+                result_all = await session.execute(stmt_all)
+                record_all = result_all.scalar_one_or_none()
+                if record_all:
+                    logger.warning(f"Asset {asset_id} exists but belongs to project {record_all.asset_project_id}, not {asset_project_id}")
+                else:
+                    logger.warning(f"Asset {asset_id} does not exist in the database at all")
+            else:
+                logger.info(f"Found asset: asset_id={record.asset_id}, asset_name={record.asset_name}, project_id={record.asset_project_id}")
+            
         return record
 
     async def get_project_assets(self, project_id: int):
@@ -105,6 +122,9 @@ class AssetModel(BaseDataModel):
         Returns:
             Number of deleted assets (should be 1 if successful, 0 if not found)
         """
+        import logging
+        logger = logging.getLogger(__name__)
+        
         async with self.db_client() as session:
             async with session.begin():
                 stmt = delete(Asset).where(
@@ -112,7 +132,9 @@ class AssetModel(BaseDataModel):
                     Asset.asset_project_id == asset_project_id
                 )
                 result = await session.execute(stmt)
-                await session.commit()
+                # The session.begin() context manager will handle the commit
+                logger.info(f"Delete query executed: asset_id={asset_id}, project_id={asset_project_id}, rows_affected={result.rowcount}")
+        
         return result.rowcount
 
     async def delete_all_project_assets(self, project_id: int):

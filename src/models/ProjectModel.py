@@ -109,13 +109,17 @@ class ProjectModel(BaseDataModel):
     async def get_user_projects(self, user_id: int, page: int = 1, page_size: int = 10):
         """
         Get all projects belonging to a specific user with pagination.
+        Only returns projects that have both user_id and project_code set.
         """
         async with self.db_client() as session:
             async with session.begin():
-                # Count total projects for this user
+                # Count total projects for this user (only those with project_code)
                 total_documents_result = await session.execute(select(
                     func.count(Project.project_id)
-                ).where(Project.user_id == user_id))
+                ).where(
+                    Project.user_id == user_id,
+                    Project.project_code.isnot(None)  # Only projects with project_code
+                ))
                 total_documents = total_documents_result.scalar_one()
 
                 # Calculate total pages
@@ -123,10 +127,11 @@ class ProjectModel(BaseDataModel):
                 if total_documents % page_size > 0:
                     total_pages += 1
 
-                # Get user's projects with pagination
+                # Get user's projects with pagination (only those with project_code)
                 query = select(Project).where(
-                    Project.user_id == user_id
-                ).offset((page - 1) * page_size).limit(page_size)
+                    Project.user_id == user_id,
+                    Project.project_code.isnot(None)  # Only projects with project_code
+                ).order_by(Project.project_code).offset((page - 1) * page_size).limit(page_size)
                 result = await session.execute(query)
                 projects = result.scalars().all()
 

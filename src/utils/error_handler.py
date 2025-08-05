@@ -107,6 +107,12 @@ class ErrorHandler:
             "suggestion": "Check if the file was uploaded successfully or try uploading it again.",
             "category": "file"
         },
+        "FILE_ACCESS_DENIED": {
+            "title": "File Access Denied",
+            "message": "You don't have permission to access this file.",
+            "suggestion": "This file belongs to another project. You can only access files from your own projects.",
+            "category": "file"
+        },
         "FILE_PROCESSING_FAILED": {
             "title": "File Processing Failed",
             "message": "The file could not be processed due to an error in the content.",
