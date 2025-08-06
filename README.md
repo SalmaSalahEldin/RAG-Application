@@ -376,23 +376,6 @@ The project includes comprehensive tests:
 - ✅ Authentication and authorization tests
 - ✅ Multi-user isolation tests
 
-## 🚀 Deployment
-
-### **Production Checklist**
-- [ ] Set up production PostgreSQL database
-- [ ] Configure environment variables
-- [ ] Set up HTTPS/SSL certificates
-- [ ] Configure reverse proxy (nginx)
-- [ ] Set up monitoring and logging
-- [ ] Configure backup strategies
-- [ ] Set up CI/CD pipeline
-
-### **Docker Deployment**
-```bash
-# Build and run with Docker Compose
-docker-compose up -d
-```
-
 ## 📖 Additional Documentation
 
 - [Local Setup Guide](LOCAL_SETUP_GUIDE.md) - Detailed local setup instructions
@@ -416,4 +399,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**🎉 RAG: A complete, production-ready AI-powered question-answering system with full multi-user support and modern architecture!**
+**🎉 RAG: A complete, AI-powered question-answering system with full multi-user support and modern architecture!**
